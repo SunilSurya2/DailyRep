@@ -1,70 +1,98 @@
 import { store } from '../state/store.js';
 
 let activeCategory = 'all';
-let waterCount = 3;
-const totalWater = 4;
 
 export function renderDailyHabitsView() {
-  const { habits } = store.state;
+  const { habits, stats, breathingCoach, isAddHabitOpen } = store.state;
 
   const categories = [
     { id: 'all', label: 'All Habits' },
-    { id: 'morning', label: '🌅 Morning Ritual' },
-    { id: 'health', label: '💧 Physical Health' },
-    { id: 'mindfulness', label: '🧘 Mindfulness' },
+    { id: 'morning', label: '🌅 Morning Routine' },
+    { id: 'afternoon', label: '⚡ Afternoon Focus' },
     { id: 'evening', label: '🌙 Evening Wind-down' }
   ];
 
+  const filteredHabits = activeCategory === 'all'
+    ? habits
+    : habits.filter(h => h.category === activeCategory);
+
+  const completedCount = habits.filter(h => h.completed).length;
+
+  // Water calculation: 1 glass = 250ml (0.25L)
+  const glassesLogged = Math.round(stats.water / 0.25);
+  const totalGlasses = Math.round(stats.waterTarget / 0.25);
+
   return `
     <div class="flex flex-col w-full gap-unit-md pb-unit-3xl pt-2">
-      <!-- Weekly Streak Strip Header Card -->
+      <!-- Weekly Momentum Summary Card -->
       <div class="bg-surface-container-lowest rounded-3xl p-unit-lg shadow-sm border border-surface-container-high/50 flex flex-col gap-unit-md relative overflow-hidden">
         <div class="absolute -right-8 -top-8 w-32 h-32 rounded-full blur-2xl pointer-events-none bg-blue-500/15"></div>
         <div class="flex items-center justify-between z-10">
           <div class="flex flex-col">
             <span class="font-label-md text-label-md uppercase tracking-wider text-[#343A40] text-[11px] font-bold">Weekly Momentum</span>
-            <div class="flex items-center gap-unit-xs mt-unit-2xs">
-              <span class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-[#101317]">6 of 7 Days</span>
-              <span class="inline-flex items-center gap-unit-2xs px-unit-xs py-unit-2xs rounded-full font-label-md text-label-md bg-blue-50 text-blue-600 font-bold">
-                <span class="material-symbols-outlined text-[16px] fill text-blue-600">local_fire_department</span>
-                86%
+            <div class="flex items-baseline gap-unit-2xs mt-0.5">
+              <span class="font-stat-counter text-stat-counter font-extrabold text-[#101317] tracking-tight">
+                ${habits.length > 0 ? Math.round((completedCount / habits.length) * 100) : 0}%
               </span>
+              <span class="font-body-sm text-body-sm text-emerald-600 font-bold ml-1">+12% vs last week</span>
             </div>
           </div>
-          <div class="w-11 h-11 rounded-full flex items-center justify-center bg-blue-50 text-blue-600 shadow-inner">
-            <span class="material-symbols-outlined text-[24px]">verified</span>
-          </div>
+          <button id="habits-open-add-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 text-white font-label-md text-xs font-bold shadow-md shadow-blue-500/25 active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[16px]">add</span>
+            <span>New Habit</span>
+          </button>
         </div>
 
-        <!-- 7-Day Dot Matrix Track -->
-        <div class="grid grid-cols-7 gap-unit-xs pt-unit-xs z-10">
-          ${['M', 'T', 'W', 'T', 'F'].map(day => `
-            <div class="flex flex-col items-center gap-unit-2xs">
-              <span class="font-label-md text-xs font-semibold text-[#343A40]">${day}</span>
-              <div class="w-9 h-9 rounded-full text-white flex items-center justify-center bg-[#343A40] shadow-sm">
-                <span class="material-symbols-outlined text-[18px]">check</span>
+        <!-- 7-Day Matrix Strip -->
+        <div class="grid grid-cols-7 gap-1 pt-unit-xs z-10 border-t border-gray-100">
+          ${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, idx) => {
+            const isDone = idx <= 3; // Past days met
+            const isToday = idx === 3;
+            return `
+              <div class="flex flex-col items-center gap-1">
+                <span class="text-[11px] font-bold ${isToday ? 'text-blue-600' : 'text-gray-400'}">${day}</span>
+                <div class="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs ${isDone ? 'bg-blue-600 text-white shadow-xs' : 'bg-gray-100 text-gray-400'}">
+                  ${isDone ? '✓' : '○'}
+                </div>
               </div>
-              <span class="w-1.5 h-1.5 rounded-full bg-[#343A40]"></span>
-            </div>
-          `).join('')}
-          <div class="flex flex-col items-center gap-unit-2xs scale-105">
-            <span class="font-label-md text-xs font-bold text-blue-600">S</span>
-            <div class="w-9 h-9 rounded-full text-white flex items-center justify-center bg-blue-600 shadow-md shadow-blue-500/50 animate-pulse">
-              <span class="material-symbols-outlined text-[18px]">bolt</span>
-            </div>
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-          </div>
-          <div class="flex flex-col items-center gap-unit-2xs opacity-70">
-            <span class="font-label-md text-xs text-[#AAB2BD]">S</span>
-            <div class="w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 text-[#AAB2BD]">
-              <span class="material-symbols-outlined text-[16px]">lock</span>
-            </div>
-            <span class="w-1.5 h-1.5 rounded-full bg-[#AAB2BD]"></span>
-          </div>
+            `;
+          }).join('')}
         </div>
       </div>
 
-      <!-- Horizontal Filter / Category Tabs -->
+      <!-- Add Habit Modal / Inline Panel -->
+      ${isAddHabitOpen ? `
+        <div class="p-4 rounded-3xl bg-blue-50/80 border border-blue-200 flex flex-col gap-3 animate-fade-in shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="font-headline-md text-sm font-bold text-blue-900">Create New Habit</span>
+            <button id="habits-cancel-add-btn" class="text-xs text-gray-500 font-bold hover:text-gray-800">Cancel</button>
+          </div>
+          <input id="new-habit-title" type="text" placeholder="Habit title (e.g., Cold Plunge 3m)" class="w-full px-3.5 py-2 rounded-xl bg-white border border-gray-200 font-body-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input id="new-habit-desc" type="text" placeholder="Description or target time" class="w-full px-3.5 py-2 rounded-xl bg-white border border-gray-200 font-body-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] text-gray-500 font-bold uppercase block mb-1">Time of Day</label>
+              <select id="new-habit-category" class="w-full px-3 py-1.5 rounded-xl bg-white border border-gray-200 font-body-sm text-xs">
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="evening">Evening</option>
+                <option value="all">All Day</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-gray-500 font-bold uppercase block mb-1">Schedule Time</label>
+              <input id="new-habit-time" type="text" value="07:30 AM" class="w-full px-3 py-1.5 rounded-xl bg-white border border-gray-200 font-body-sm text-xs" />
+            </div>
+          </div>
+
+          <button id="habits-submit-new-btn" class="w-full h-10 rounded-xl bg-blue-600 text-white font-label-md text-xs font-bold shadow-md active:scale-95 transition-all">
+            Save Habit to Routine
+          </button>
+        </div>
+      ` : ''}
+
+      <!-- Interactive Category Tabs -->
       <div class="flex items-center gap-unit-xs overflow-x-auto py-unit-2xs no-scrollbar -mx-margin-mobile px-margin-mobile">
         ${categories.map(c => {
           const isActive = activeCategory === c.id;
@@ -79,182 +107,112 @@ export function renderDailyHabitsView() {
         }).join('')}
       </div>
 
-      <!-- Habit Cards Stack -->
+      <!-- Dynamic Habit Cards Stack -->
       <div class="flex flex-col gap-unit-sm">
-        <!-- Morning Walk & Sun -->
-        <div class="group bg-surface-container-lowest rounded-3xl p-unit-md shadow-sm border border-surface-container-high/40 flex items-center justify-between gap-unit-md transition-all hover:shadow-md relative overflow-hidden">
-          <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600"></div>
-          <div class="flex items-center gap-unit-sm min-w-0">
-            <div class="relative w-12 h-12 rounded-2xl overflow-hidden shrink-0 shadow-sm">
-              <img class="w-full h-full object-cover" alt="Morning Walk" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKkybobOHQa8AUADcocDPKC5RsEhbp4hlaDLhFuY7Rm2rDp5qK9-Wups6bvbj4lOLsPdZn734H2VD5CHkXvoXYELrWhUDUxOgpc_4aveVpzCzj8CjiBsd4sCjfXhjSVgX9XcO8Ub8qRS3T9OmkSSnBoMwM-6qzN12JgowdwXFP3Tic-Y4ya4yserlcVJG1SclG2owF-UnLLix0_hFzdTnSbcKylj1jXdW9F3lnBbHi83auBOEcoZGc" />
-              <div class="absolute inset-0 flex items-center justify-center text-white bg-black/30 backdrop-blur-xs">
-                <span class="material-symbols-outlined text-[20px]">sunny</span>
-              </div>
-            </div>
-            <div class="flex flex-col min-w-0">
-              <span class="font-headline-md text-headline-md line-through opacity-80 truncate text-[#101317]">Morning Walk & Sun</span>
-              <div class="flex items-center gap-unit-xs mt-unit-2xs font-body-sm text-body-sm text-[#343A40]">
-                <span class="px-unit-xs py-0.5 rounded-full font-label-md text-xs bg-gray-100 text-gray-700">Morning</span>
-                <span>•</span>
-                <span>15 mins</span>
-                <span>•</span>
-                <span class="inline-flex items-center gap-0.5 font-label-md text-xs text-blue-600 font-bold">
-                  <span class="material-symbols-outlined text-[14px] fill text-blue-600">local_fire_department</span> 21d
-                </span>
-              </div>
-            </div>
-          </div>
-          <button class="w-11 h-11 rounded-full text-white flex items-center justify-center shrink-0 bg-blue-600 shadow-md shadow-blue-500/35 transition-transform active:scale-90">
-            <span class="material-symbols-outlined text-[22px] font-bold">done_all</span>
-          </button>
-        </div>
+        ${filteredHabits.map(habit => {
+          const isDone = habit.completed;
+          const cardBorder = isDone ? 'border-emerald-200 bg-emerald-50/30' : 'border-gray-200 bg-white hover:bg-gray-50';
+          const buttonBg = isDone ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200';
 
-        <!-- Electrolyte Water with interactive Log Glass -->
-        <div class="bg-surface-container-lowest rounded-3xl p-unit-md shadow-sm border border-surface-container-high/40 flex flex-col gap-unit-sm transition-all hover:shadow-md">
-          <div class="flex items-center justify-between gap-unit-md">
-            <div class="flex items-center gap-unit-sm min-w-0">
-              <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-blue-50 text-blue-600">
-                <span class="material-symbols-outlined text-[24px]">water_drop</span>
-              </div>
-              <div class="flex flex-col min-w-0">
-                <span class="font-headline-md text-headline-md truncate text-[#101317]">Electrolyte Water</span>
-                <div class="flex items-center gap-unit-xs mt-unit-2xs font-body-sm text-body-sm text-[#343A40]">
-                  <span class="px-unit-xs py-0.5 rounded-full font-label-md text-xs bg-gray-100 text-gray-700">Health</span>
-                  <span>•</span>
-                  <span class="inline-flex items-center gap-0.5 font-label-md text-xs text-blue-600 font-bold">
-                    <span class="material-symbols-outlined text-[14px] fill text-blue-600">local_fire_department</span> 34d streak
+          return `
+            <div class="p-unit-md rounded-3xl border shadow-sm flex items-center justify-between gap-unit-md transition-all relative overflow-hidden ${cardBorder}">
+              <div class="flex items-center gap-unit-sm min-w-0">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 text-white" style="background-color: ${habit.color || '#3B82F6'};">
+                  <span class="material-symbols-outlined text-[22px]">${habit.icon || 'check_circle'}</span>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="font-headline-md text-sm font-bold text-[#101317] truncate ${isDone ? 'line-through text-gray-400' : ''}">
+                    ${habit.name}
                   </span>
+                  <div class="flex items-center gap-1.5 mt-0.5 text-xs text-gray-500">
+                    <span class="capitalize px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 font-semibold text-[10px]">${habit.category}</span>
+                    <span>•</span>
+                    <span>${habit.time}</span>
+                    <span>•</span>
+                    <span class="inline-flex items-center gap-0.5 font-bold text-orange-600">
+                      <span class="material-symbols-outlined text-[13px] fill">local_fire_department</span> ${habit.streak}d
+                    </span>
+                  </div>
                 </div>
               </div>
+
+              <div class="flex items-center gap-2">
+                <button data-toggle-habit="${habit.id}" class="habit-complete-action w-11 h-11 rounded-full flex items-center justify-center shrink-0 shadow-md active:scale-90 transition-transform ${buttonBg}">
+                  <span class="material-symbols-outlined text-[22px] font-bold">${isDone ? 'done_all' : 'radio_button_unchecked'}</span>
+                </button>
+                <button data-delete-habit="${habit.id}" title="Remove habit" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-300 hover:text-red-500 transition-colors">
+                  <span class="material-symbols-outlined text-[18px]">delete</span>
+                </button>
+              </div>
             </div>
-            <button id="habits-log-water-btn" class="px-unit-sm py-unit-xs rounded-full text-white font-label-md text-label-md flex items-center gap-unit-2xs bg-blue-600 shadow-md shadow-blue-500/25 active:scale-95 transition-transform font-bold">
-              <span class="material-symbols-outlined text-[16px]">add</span>
-              <span>Log Glass</span>
+          `;
+        }).join('')}
+      </div>
+
+      <!-- Interactive Glass-by-Glass Water Logger Card -->
+      <div class="bg-surface-container-lowest rounded-3xl p-unit-md shadow-sm border border-surface-container-high/40 flex flex-col gap-unit-sm">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-unit-sm">
+            <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-blue-50 text-blue-600">
+              <span class="material-symbols-outlined text-[22px] fill">water_drop</span>
+            </div>
+            <div>
+              <h4 class="font-label-lg font-bold text-[#101317] text-sm">Hydration Goal</h4>
+              <span class="text-xs text-gray-500">${stats.water}L of ${stats.waterTarget}L (${glassesLogged}/${totalGlasses} glasses)</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button id="habits-water-dec-btn" class="w-8 h-8 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 active:scale-90 transition-all">-</button>
+            <button id="habits-water-inc-btn" class="px-3 py-1.5 rounded-full bg-blue-600 text-white font-label-md text-xs font-bold shadow-sm active:scale-95 transition-all flex items-center gap-1">
+              <span>+ Glass</span>
             </button>
           </div>
-          <div class="flex items-center gap-unit-xs pt-unit-2xs">
-            ${[0, 1, 2, 3].map(idx => `
-              <div class="flex-1 h-2 rounded-full transition-all ${idx < waterCount ? 'bg-blue-600' : 'bg-gray-300'}"></div>
-            `).join('')}
-            <span class="font-label-md text-xs font-bold ml-unit-xs text-gray-700">${waterCount}/${totalWater}</span>
-          </div>
         </div>
 
-        <!-- 10-Min Breathwork -->
-        <div class="bg-surface-container-lowest rounded-3xl p-unit-md shadow-sm border border-surface-container-high/40 flex items-center justify-between gap-unit-md transition-all hover:shadow-md">
-          <div class="flex items-center gap-unit-sm min-w-0">
-            <div class="relative w-12 h-12 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center bg-gray-100">
-              <img class="w-full h-full object-cover" alt="Breathwork Room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBH0_zpoHHBtSympJTbS0vDjzGj9nzeuiCeC8b8kfuqopwhQvb78Be5tK79YNVp9KUWwQ68IQk9OoIPiRR3Bxsr0ythKtg2276OBeBAYgNbTOq0GgzB7ZfpmhmRxizESdpE7R3pkX-1Tv4yL0Z-QEMqyYTqsLuPGad9KRuydgqBVASdTTUQ1SOdGOhS6EIaM2WrGhHK96_KoN-m5zmayYlequrMiklZxVsa05rZVq9GL_RQBcsy6XnN" />
-              <div class="absolute inset-0 flex items-center justify-center text-white bg-black/25">
-                <span class="material-symbols-outlined text-[22px]">self_improvement</span>
+        <!-- 8 Visual Glasses Grid -->
+        <div class="grid grid-cols-8 gap-1.5 pt-1">
+          ${Array.from({ length: totalGlasses }).map((_, i) => {
+            const filled = i < glassesLogged;
+            return `
+              <div data-glass-idx="${i}" class="water-glass-item h-10 rounded-xl flex flex-col justify-end p-1 transition-all cursor-pointer ${filled ? 'bg-blue-600 text-white shadow-xs' : 'bg-blue-50 text-blue-300 border border-blue-100'}">
+                <span class="material-symbols-outlined text-[16px] mx-auto">${filled ? 'water_full' : 'local_drink'}</span>
               </div>
-            </div>
-            <div class="flex flex-col min-w-0">
-              <span class="font-headline-md text-headline-md truncate text-[#101317]">10-Min Breathwork</span>
-              <div class="flex items-center gap-unit-xs mt-unit-2xs font-body-sm text-body-sm text-[#343A40]">
-                <span class="px-unit-xs py-0.5 rounded-full font-label-md text-xs bg-gray-100 text-gray-700">Mindfulness</span>
-                <span>•</span>
-                <span class="inline-flex items-center gap-0.5 font-label-md text-xs text-blue-600 font-bold">
-                  <span class="material-symbols-outlined text-[14px] fill text-blue-600">local_fire_department</span> 5d
-                </span>
-              </div>
-            </div>
-          </div>
-          <button class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 bg-blue-50 text-blue-600 shadow-sm active:scale-95 transition-all">
-            <span class="material-symbols-outlined text-[22px] fill text-blue-600">play_arrow</span>
-          </button>
-        </div>
-
-        <!-- Cold Shower Protocol -->
-        <div class="bg-surface-container-lowest rounded-3xl p-unit-md shadow-sm border border-surface-container-high/40 flex items-center justify-between gap-unit-md transition-all hover:shadow-md">
-          <div class="flex items-center gap-unit-sm min-w-0">
-            <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-blue-50 text-blue-600">
-              <span class="material-symbols-outlined text-[24px]">ac_unit</span>
-            </div>
-            <div class="flex flex-col min-w-0">
-              <span class="font-headline-md text-headline-md truncate text-[#101317]">Cold Shower Protocol</span>
-              <div class="flex items-center gap-unit-xs mt-unit-2xs font-body-sm text-body-sm text-[#343A40]">
-                <span class="px-unit-xs py-0.5 rounded-full font-label-md text-xs bg-gray-100 text-gray-700">Recovery</span>
-                <span>•</span>
-                <span>3 mins</span>
-                <span>•</span>
-                <span class="inline-flex items-center gap-0.5 font-label-md text-xs text-blue-600 font-bold">
-                  <span class="material-symbols-outlined text-[14px] fill text-blue-600">local_fire_department</span> 12d
-                </span>
-              </div>
-            </div>
-          </div>
-          <button class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-gray-100 border border-gray-300 text-gray-500 active:scale-95 transition-all">
-            <span class="material-symbols-outlined text-[20px]">check</span>
-          </button>
-        </div>
-
-        <!-- No Screens Pre-Bed -->
-        <div class="bg-surface-container-lowest rounded-3xl p-unit-md shadow-sm border border-surface-container-high/40 flex items-center justify-between gap-unit-md transition-all hover:shadow-md">
-          <div class="flex items-center gap-unit-sm min-w-0">
-            <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-gray-100 text-gray-800">
-              <span class="material-symbols-outlined text-[24px]">bedtime</span>
-            </div>
-            <div class="flex flex-col min-w-0">
-              <span class="font-headline-md text-headline-md truncate text-[#101317]">No Screens Pre-Bed</span>
-              <div class="flex items-center gap-unit-xs mt-unit-2xs font-body-sm text-body-sm text-[#343A40]">
-                <span class="px-unit-xs py-0.5 rounded-full font-label-md text-xs bg-gray-100 text-gray-700">Evening</span>
-                <span>•</span>
-                <span>10:30 PM</span>
-                <span>•</span>
-                <span class="inline-flex items-center gap-0.5 font-label-md text-xs text-blue-600 font-bold">
-                  <span class="material-symbols-outlined text-[14px] fill text-blue-600">local_fire_department</span> 9d
-                </span>
-              </div>
-            </div>
-          </div>
-          <button class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-gray-100 border border-gray-300 text-gray-400 active:scale-95 transition-all">
-            <span class="material-symbols-outlined text-[20px]">hourglass_empty</span>
-          </button>
+            `;
+          }).join('')}
         </div>
       </div>
 
-      <!-- Quick Add Habit Template -->
-      <div class="mt-unit-xs bg-surface-container-lowest rounded-3xl p-unit-lg shadow-sm border border-surface-container-high/50 flex flex-col gap-unit-md relative overflow-hidden">
-        <div class="flex items-center justify-between">
+      <!-- Functional Interactive Box Breathing Coach -->
+      <div class="rounded-3xl p-unit-lg text-white shadow-lg border border-gray-800 bg-gradient-to-br from-[#101317] to-[#1e293b] flex flex-col gap-unit-md overflow-hidden relative">
+        <div class="flex items-center justify-between z-10">
           <div class="flex items-center gap-unit-xs">
-            <div class="w-8 h-8 rounded-full text-white flex items-center justify-center bg-blue-600 shadow-md shadow-blue-500/30">
-              <span class="material-symbols-outlined text-[18px]">add</span>
-            </div>
-            <span class="font-headline-md text-headline-md font-bold text-[#101317]">Quick Add Habit</span>
+            <span class="material-symbols-outlined text-[20px] text-blue-400">air</span>
+            <span class="font-label-lg font-extrabold text-sm uppercase tracking-wider">Box Breathing Guide</span>
           </div>
-          <span class="px-unit-xs py-unit-2xs rounded-full font-label-md text-xs bg-gray-100 text-gray-700 font-semibold">Template</span>
+          <span class="text-xs text-white/70 font-semibold">${breathingCoach.cyclesCompleted} cycles completed</span>
         </div>
 
-        <div class="flex flex-col gap-unit-2xs">
-          <label class="font-label-md text-xs font-semibold text-gray-700">Habit Name</label>
-          <div class="h-12 rounded-2xl px-unit-md flex items-center font-body-md text-body-md justify-between bg-gray-50 border border-gray-200">
-            <input id="new-habit-name" type="text" value="Creatine 5g Monohydrate" class="bg-transparent border-none outline-none font-semibold text-[#101317] w-full" />
-            <span class="material-symbols-outlined text-[20px] text-gray-500">edit</span>
+        <div class="flex flex-col items-center justify-center my-2 z-10">
+          <div class="relative w-32 h-32 rounded-full flex items-center justify-center border-4 border-blue-500/30 ${breathingCoach.isActive ? 'animate-breath' : ''}">
+            <div class="flex flex-col items-center justify-center text-center">
+              <span class="font-headline-lg-mobile text-2xl font-extrabold text-white tracking-tight">${breathingCoach.phase}</span>
+              <span class="text-3xl font-mono font-black text-blue-400 mt-0.5">${breathingCoach.secondsLeft}s</span>
+            </div>
           </div>
+          <span class="text-xs text-white/60 mt-3 font-medium text-center">Inhale (4s) • Hold (4s) • Exhale (4s) • Hold (4s)</span>
         </div>
 
-        <div class="grid grid-cols-2 gap-unit-xs">
-          <div class="p-unit-sm rounded-2xl flex items-center justify-between bg-gray-50 border border-gray-100">
-            <div class="flex flex-col">
-              <span class="font-label-md text-[11px] text-gray-500">Frequency</span>
-              <span class="font-label-lg text-sm font-bold text-[#101317]">Daily (7x)</span>
-            </div>
-            <span class="material-symbols-outlined text-[18px] text-gray-600">calendar_today</span>
-          </div>
-          <div class="p-unit-sm rounded-2xl flex items-center justify-between bg-gray-50 border border-gray-100">
-            <div class="flex flex-col">
-              <span class="font-label-md text-[11px] text-gray-500">Reminder</span>
-              <span class="font-label-lg text-sm font-bold text-[#101317]">08:00 AM</span>
-            </div>
-            <span class="material-symbols-outlined text-[18px] text-gray-600">notifications_active</span>
-          </div>
+        <div class="flex items-center gap-2 z-10">
+          <button id="habits-breathing-toggle-btn" class="flex-1 h-11 rounded-full ${breathingCoach.isActive ? 'bg-amber-500 text-white' : 'bg-blue-600 text-white'} font-label-md text-xs font-bold flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[18px] fill">${breathingCoach.isActive ? 'pause' : 'play_arrow'}</span>
+            <span>${breathingCoach.isActive ? 'Pause Exercise' : 'Start 4-4-4-4 Breath'}</span>
+          </button>
+          ${breathingCoach.isActive ? `
+            <button id="habits-breathing-stop-btn" class="h-11 px-4 rounded-full bg-white/10 text-white font-label-md text-xs font-bold hover:bg-white/20 active:scale-95 transition-all">
+              Reset
+            </button>
+          ` : ''}
         </div>
-
-        <button id="habits-save-new-btn" class="w-full h-[50px] mt-unit-2xs rounded-full text-white font-label-lg text-label-lg font-bold flex items-center justify-center gap-unit-xs bg-blue-600 shadow-lg shadow-blue-500/30 active:scale-98 transition-all">
-          <span class="material-symbols-outlined text-[20px]">check_circle</span>
-          <span>Save Habit to Routine</span>
-        </button>
       </div>
     </div>
   `;
@@ -268,32 +226,94 @@ export function bindDailyHabitsEvents() {
     };
   });
 
-  const waterBtn = document.getElementById('habits-log-water-btn');
-  if (waterBtn) {
-    waterBtn.onclick = () => {
-      waterCount = waterCount >= totalWater ? 1 : waterCount + 1;
+  document.querySelectorAll('.habit-complete-action').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.getAttribute('data-toggle-habit');
+      if (id) store.toggleHabit(id);
+    };
+  });
+
+  document.querySelectorAll('.water-glass-item').forEach(glass => {
+    glass.onclick = () => {
+      const idx = Number(glass.getAttribute('data-glass-idx'));
+      const targetLiters = +( (idx + 1) * 0.25 ).toFixed(2);
+      store.state.stats.water = targetLiters;
+      store.showToast(`Hydration: ${targetLiters}L logged`, 'success');
       store.notify();
+    };
+  });
+
+  document.querySelectorAll('[data-delete-habit]').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.getAttribute('data-delete-habit');
+      if (id && confirm('Are you sure you want to remove this habit from your routine?')) {
+        store.deleteHabit(id);
+      }
+    };
+  });
+
+  const waterIncBtn = document.getElementById('habits-water-inc-btn');
+  if (waterIncBtn) {
+    waterIncBtn.onclick = () => store.logWater(0.25);
+  }
+
+  const waterDecBtn = document.getElementById('habits-water-dec-btn');
+  if (waterDecBtn) {
+    waterDecBtn.onclick = () => store.logWater(-0.25);
+  }
+
+  const openAddBtn = document.getElementById('habits-open-add-btn');
+  if (openAddBtn) {
+    openAddBtn.onclick = () => store.toggleAddHabit(true);
+  }
+
+  const cancelAddBtn = document.getElementById('habits-cancel-add-btn');
+  if (cancelAddBtn) {
+    cancelAddBtn.onclick = () => store.toggleAddHabit(false);
+  }
+
+  const submitNewBtn = document.getElementById('habits-submit-new-btn');
+  if (submitNewBtn) {
+    submitNewBtn.onclick = () => {
+      const titleInput = document.getElementById('new-habit-title');
+      const descInput = document.getElementById('new-habit-desc');
+      const catInput = document.getElementById('new-habit-category');
+      const timeInput = document.getElementById('new-habit-time');
+
+      const name = titleInput ? titleInput.value.trim() : '';
+      if (!name) {
+        store.showToast('Please enter a habit title', 'error');
+        return;
+      }
+
+      store.addHabit({
+        name,
+        desc: descInput ? descInput.value.trim() || 'Daily habit routine' : 'Daily habit routine',
+        category: catInput ? catInput.value : 'morning',
+        time: timeInput ? timeInput.value : '08:00 AM',
+        color: catInput && catInput.value === 'evening' ? '#8B5CF6' : catInput && catInput.value === 'afternoon' ? '#FF5A36' : '#3B82F6'
+      });
     };
   }
 
-  const saveBtn = document.getElementById('habits-save-new-btn');
-  if (saveBtn) {
-    saveBtn.onclick = () => {
-      const input = document.getElementById('new-habit-name');
-      const name = input ? input.value.trim() : 'Creatine 5g';
-      if (name) {
-        store.state.habits.push({
-          id: 'h_' + Date.now(),
-          name,
-          desc: 'Daily supplement routine',
-          streak: 1,
-          completed: false,
-          category: 'health',
-          time: '08:00 AM',
-          color: '#3B82F6'
-        });
-        store.notify();
+  const breathToggleBtn = document.getElementById('habits-breathing-toggle-btn');
+  if (breathToggleBtn) {
+    breathToggleBtn.onclick = () => {
+      if (store.state.breathingCoach.isActive) {
+        store.stopBreathing();
+      } else {
+        store.startBreathing();
       }
+    };
+  }
+
+  const breathStopBtn = document.getElementById('habits-breathing-stop-btn');
+  if (breathStopBtn) {
+    breathStopBtn.onclick = () => {
+      store.stopBreathing();
+      store.state.breathingCoach.phase = 'Inhale';
+      store.state.breathingCoach.secondsLeft = 4;
+      store.notify();
     };
   }
 }
