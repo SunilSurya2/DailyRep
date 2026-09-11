@@ -38,7 +38,7 @@ function renderApp() {
 
   appEl.innerHTML = `
     ${renderHeader()}
-    <main class="flex-1 flex flex-col relative w-full pt-16 pb-20 bg-surface px-margin-mobile">
+    <main class="flex-1 flex flex-col relative w-full main-content-offset pb-24 bg-surface px-margin-mobile">
       ${viewHtml}
     </main>
     ${renderBottomNav()}

@@ -23,6 +23,10 @@
     padding-top: max(env(safe-area-inset-top, 0px), 12px);
   }
 
+  .main-content-offset {
+    padding-top: calc(max(env(safe-area-inset-top, 0px), 12px) + 4rem + 1.25rem);
+  }
+
   main > :first-child {
     margin-top: 0 !important;
   }
