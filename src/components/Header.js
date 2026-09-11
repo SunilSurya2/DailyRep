@@ -15,7 +15,7 @@ export function renderHeader() {
   const title = tabTitles[currentTab] || 'DailyRep';
 
   return `
-    <header class="fixed top-0 max-w-md w-full z-40 bg-surface/90 backdrop-blur-xl pt-safe border-b border-surface-container-high/40">
+    <header class="fixed top-0 max-w-md w-full z-40 bg-surface/90 backdrop-blur-xl pt-safe">
       <div class="h-16 px-margin-mobile flex items-center justify-between">
         <div class="flex items-center gap-unit-sm">
           <div class="h-8 w-11 flex items-center justify-center transition-transform active:scale-95 shrink-0">
