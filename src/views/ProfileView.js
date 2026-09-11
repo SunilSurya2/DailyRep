@@ -208,6 +208,17 @@ export function renderProfileView() {
           </div>
         </div>
       </div>
+
+      <!-- App Brand Footer -->
+      <div class="flex flex-col items-center justify-center py-unit-lg text-center gap-2">
+        <div class="w-14 h-14 rounded-2xl bg-slate-950 p-2 border border-blue-500/20 shadow-lg shadow-blue-500/10 flex items-center justify-center">
+          <img src="/logo.png" alt="DailyRep Logo" class="w-full h-full object-contain" />
+        </div>
+        <div class="flex flex-col">
+          <span class="font-label-lg font-extrabold text-on-surface tracking-tight text-base">DailyRep</span>
+          <span class="font-label-md text-xs text-on-surface-variant font-medium">Version 1.0.0 • Endless Momentum</span>
+        </div>
+      </div>
     </div>
   `;
 }

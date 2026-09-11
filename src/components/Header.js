@@ -18,8 +18,8 @@ export function renderHeader() {
     <header class="fixed top-0 max-w-md w-full z-40 bg-surface/90 backdrop-blur-xl pt-safe border-b border-surface-container-high/40">
       <div class="h-16 px-margin-mobile flex items-center justify-between">
         <div class="flex items-center gap-unit-sm">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-            <span class="material-symbols-outlined text-[22px] font-bold">all_inclusive</span>
+          <div class="w-10 h-10 rounded-xl bg-slate-950 flex items-center justify-center p-1 border border-blue-500/20 shadow-md shadow-blue-500/15 transition-transform active:scale-95">
+            <img src="/logo.png" alt="DailyRep Logo" class="w-full h-full object-contain" />
           </div>
           <div class="flex flex-col">
             <span class="font-label-lg text-label-lg text-on-surface tracking-tight font-extrabold leading-none">DailyRep</span>

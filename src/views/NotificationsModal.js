@@ -22,6 +22,9 @@ export function renderNotificationsModal() {
             <button id="notif-close-btn" class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-gray-200 active:scale-90 transition-all">
               <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
+            <div class="w-7 h-7 rounded-lg bg-slate-950 p-0.5 border border-blue-500/20 flex items-center justify-center">
+              <img src="/logo.png" alt="Logo" class="w-full h-full object-contain" />
+            </div>
             <h2 class="font-headline-md font-extrabold text-[#101317]">Notifications</h2>
           </div>
           <button id="notif-mark-read-btn" class="flex items-center gap-1 font-label-md text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 active:scale-95 transition-all">
