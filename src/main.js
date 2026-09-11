@@ -57,7 +57,7 @@ function renderApp() {
     ${renderHeader()}
 
     <!-- Main Dynamic View Container -->
-    <main class="flex-1 flex flex-col relative w-full pb-24 bg-surface px-margin-mobile pt-2">
+    <main class="flex-1 flex flex-col relative w-full pb-28 bg-surface px-margin-mobile pt-2">
       ${viewHtml}
     </main>
 
