@@ -211,8 +211,8 @@ export function renderProfileView() {
 
       <!-- App Brand Footer -->
       <div class="flex flex-col items-center justify-center py-unit-lg text-center gap-2">
-        <div class="w-14 h-14 rounded-2xl bg-slate-950 p-2 border border-blue-500/20 shadow-lg shadow-blue-500/10 flex items-center justify-center">
-          <img src="/logo.png" alt="DailyRep Logo" class="w-full h-full object-contain" />
+        <div class="h-10 w-16 flex items-center justify-center">
+          <img src="/logo.png" alt="DailyRep Logo" class="w-full h-full object-contain filter drop-shadow-sm" />
         </div>
         <div class="flex flex-col">
           <span class="font-label-lg font-extrabold text-on-surface tracking-tight text-base">DailyRep</span>
