@@ -224,15 +224,9 @@ export const store = {
     this.listeners.forEach(fn => fn(this.state));
   },
 
-  // Toast System
-  showToast(message, type = 'success') {
-    const id = 'toast_' + Date.now();
-    this.state.toasts.push({ id, message, type });
-    this.notify();
-    setTimeout(() => {
-      this.state.toasts = this.state.toasts.filter(t => t.id !== id);
-      this.notify();
-    }, 3200);
+  // Toast System (Disabled per user request)
+  showToast(_message, _type = 'success') {
+    this.state.toasts = [];
   },
 
   // Navigation Tabs
