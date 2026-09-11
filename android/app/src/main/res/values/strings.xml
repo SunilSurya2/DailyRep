@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DailyRep</string>
+    <string name="title_activity_main">DailyRep</string>
+    <string name="package_name">com.dailyrep.fitness</string>
+    <string name="custom_url_scheme">com.dailyrep.fitness</string>
+</resources>

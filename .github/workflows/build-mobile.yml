@@ -1,0 +1,98 @@
+name: Build DailyRep Mobile App (Android APK & iOS)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-android-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Add Capacitor Android Platform
+        run: |
+          npx cap add android || true
+          npx cap sync android
+
+      - name: Build Android APK with Gradle
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload Android Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DailyRep-Android-Debug-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+  build-ios:
+    name: Build iOS Package
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Add Capacitor iOS Platform
+        run: |
+          npx cap add ios || true
+          npx cap sync ios
+
+      - name: Build iOS App with Xcodebuild
+        working-directory: ios/App
+        run: |
+          xcodebuild -workspace App.xcworkspace \
+                     -scheme App \
+                     -destination 'generic/platform=iOS Simulator' \
+                     -configuration Release \
+                     CODE_SIGNING_ALLOWED=NO \
+                     build
+
+      - name: Upload iOS Simulator Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DailyRep-iOS-Simulator-Build
+          path: ~/Library/Developer/Xcode/DerivedData/App-*/Build/Products/Release-iphonesimulator/App.app
+          if-no-files-found: warn

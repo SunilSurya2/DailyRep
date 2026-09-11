@@ -1,0 +1,21 @@
+{
+  "appId": "com.dailyrep.fitness",
+  "appName": "DailyRep",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "buildOptions": {
+      "keystorePath": "",
+      "keystorePassword": "",
+      "keystoreAlias": "",
+      "keystoreAliasPassword": "",
+      "releaseType": "APK"
+    }
+  },
+  "ios": {
+    "scheme": "DailyRep"
+  }
+}
