@@ -1,31 +1,40 @@
 import { store } from '../state/store.js';
 
 export function renderHomeView() {
-  const { user, stats, habits, selectedDate } = store.state;
+  const { user, stats, habits, selectedDate, featuredWorkout = {} } = store.state;
   const completedHabitsCount = habits.filter(h => h.completed).length;
 
   // Exact Mathematical Convergence Calculation
-  const burnPct = Math.min(1, stats.burn / stats.burnTarget);
-  const movePct = Math.min(1, stats.move / stats.moveTarget);
-  const waterPct = Math.min(1, stats.water / stats.waterTarget);
+  const burnPct = Math.min(1, stats.burn / (stats.burnTarget || 850));
+  const movePct = Math.min(1, stats.move / (stats.moveTarget || 60));
+  const waterPct = Math.min(1, stats.water / (stats.waterTarget || 2.8));
   const overallConvergence = Math.round(((burnPct + movePct + waterPct) / 3) * 100);
 
   // SVG Circumferences
-  // Outer (Burn): 2 * PI * 82 = 515.22
   const burnCircumference = 515.22;
   const burnOffset = +(burnCircumference * (1 - burnPct)).toFixed(2);
 
-  // Middle (Move): 2 * PI * 66 = 414.69
   const moveCircumference = 414.69;
   const moveOffset = +(moveCircumference * (1 - movePct)).toFixed(2);
 
-  // Inner (Water): 2 * PI * 51 = 320.44
   const waterCircumference = 320.44;
   const waterOffset = +(waterCircumference * (1 - waterPct)).toFixed(2);
 
-  // Format Display Date
-  const dateObj = new Date(selectedDate);
-  const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  // Format Display Date & Relative Day Calculation
+  const [y, m, d] = (selectedDate || new Date().toISOString().split('T')[0]).split('-').map(Number);
+  const dateObj = new Date(y, m - 1, d);
+  const now = new Date();
+  const todayObj = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.round((dateObj.getTime() - todayObj.getTime()) / (1000 * 60 * 60 * 24));
+
+  let relativeDay = '';
+  if (diffDays === 0) relativeDay = 'Today';
+  else if (diffDays === -1) relativeDay = 'Yesterday';
+  else if (diffDays === 1) relativeDay = 'Tomorrow';
+
+  const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+  const monthDay = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const fullDateStr = relativeDay ? `${relativeDay}, ${monthDay}` : `${dayName}, ${monthDay}`;
 
   return `
     <div class="flex flex-col w-full gap-unit-lg pb-unit-3xl pt-2">
@@ -33,22 +42,27 @@ export function renderHomeView() {
       <section class="flex flex-col gap-unit-xs">
         <div class="flex items-center justify-between">
           <div class="inline-flex items-center gap-1 bg-surface-container-high px-2.5 py-1 rounded-full text-on-surface-variant font-label-md text-xs font-semibold">
-            <button id="home-prev-date-btn" class="w-5 h-5 flex items-center justify-center hover:text-on-surface active:scale-90 transition-transform">
+            <button id="home-prev-date-btn" title="Previous day" class="w-5 h-5 flex items-center justify-center hover:text-on-surface active:scale-90 transition-transform cursor-pointer">
               <span class="material-symbols-outlined text-[16px]">chevron_left</span>
             </button>
-            <span class="px-1">${dateStr}</span>
-            <button id="home-next-date-btn" class="w-5 h-5 flex items-center justify-center hover:text-on-surface active:scale-90 transition-transform">
+            <span class="px-1 font-bold text-on-surface">${fullDateStr}</span>
+            <button id="home-next-date-btn" title="Next day" class="w-5 h-5 flex items-center justify-center hover:text-on-surface active:scale-90 transition-transform cursor-pointer">
               <span class="material-symbols-outlined text-[16px]">chevron_right</span>
             </button>
+            ${diffDays !== 0 ? `
+              <button id="home-today-jump-btn" title="Jump to Today" class="ml-1 px-2 py-0.5 rounded-full bg-blue-600 text-white font-bold text-[10px] shadow-xs active:scale-95 transition-all hover:bg-blue-700 cursor-pointer">
+                Today
+              </button>
+            ` : ''}
           </div>
-          <div class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 px-unit-sm py-unit-2xs rounded-full shadow-xs">
-            <span class="material-symbols-outlined text-emerald-600 text-[16px] fill">bolt</span>
+          <div class="inline-flex items-center gap-1 ${user.readiness >= 90 ? 'bg-emerald-100 text-emerald-800' : user.readiness >= 80 ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'} px-unit-sm py-unit-2xs rounded-full shadow-xs">
+            <span class="material-symbols-outlined text-[16px] fill">bolt</span>
             <span class="font-label-md text-label-md tracking-wide font-bold">Ready ${user.readiness}%</span>
           </div>
         </div>
         <div class="flex flex-col mt-unit-2xs">
-          <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface tracking-tight font-extrabold">Good day, ${user.name}</h1>
-          <p class="font-body-sm text-body-sm text-on-surface-variant">Your vitals are peaked for endurance today. Let's conquer the streak.</p>
+          <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface tracking-tight font-extrabold">${user.readinessHeadline || `Good day, ${user.name}`}</h1>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">${user.readinessSubtitle || "Your vitals are peaked for endurance today. Let's conquer the streak."}</p>
         </div>
       </section>
 
@@ -74,13 +88,16 @@ export function renderHomeView() {
             <circle cx="100" cy="100" fill="none" r="66" stroke="#E9ECEF" stroke-width="8"></circle>
             <circle cx="100" cy="100" fill="none" r="66" stroke="#101317" stroke-dasharray="${moveCircumference}" stroke-dashoffset="${moveOffset}" stroke-linecap="round" stroke-width="8" class="transition-all duration-700"></circle>
             
-            <!-- Inner Ring: Water (Hyper Mint) -->
+            <!-- Inner Ring: Water (Hyper Mint / Green) -->
             <circle cx="100" cy="100" fill="none" r="51" stroke="#E9ECEF" stroke-width="7"></circle>
             <circle cx="100" cy="100" fill="none" r="51" stroke="#00E599" stroke-dasharray="${waterCircumference}" stroke-dashoffset="${waterOffset}" stroke-linecap="round" stroke-width="7" class="transition-all duration-700"></circle>
           </svg>
-          <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <span class="font-stat-counter text-stat-counter text-on-surface font-extrabold leading-none tracking-tight">${overallConvergence}<span class="text-headline-md font-bold text-primary">%</span></span>
-            <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[10px] mt-1 font-bold">Convergence</span>
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+            <span class="font-extrabold text-[#101317] ${overallConvergence >= 100 ? 'text-[24px]' : 'text-[28px]'} leading-none tracking-tight inline-flex items-baseline justify-center">
+              <span>${overallConvergence}</span>
+              <span class="text-sm font-extrabold text-[#101317] ml-0.5">%</span>
+            </span>
+            <span class="font-label-md text-[#101317] uppercase tracking-wider text-[9px] mt-1 font-extrabold">Convergence</span>
           </div>
         </div>
 
@@ -121,41 +138,55 @@ export function renderHomeView() {
         </div>
       </section>
 
-      <!-- Key Vitals Grid (Steps, Sleep, Resting HR) -->
-      <section class="grid grid-cols-3 gap-unit-xs">
-        <!-- Steps Card with Quick Logger -->
-        <div class="bg-surface-container-lowest rounded-2xl p-unit-md shadow-sm border border-surface-container-high/40 flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <span class="material-symbols-outlined text-[20px] text-blue-600">directions_walk</span>
-            <button id="home-quick-steps-btn" title="Log 1,000 steps" class="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full hover:bg-blue-100 active:scale-95 transition-all">+1k</button>
-          </div>
-          <div class="mt-2">
-            <span class="font-stat-counter text-xl font-extrabold text-on-surface block leading-tight">${stats.steps.toLocaleString()}</span>
-            <span class="font-label-md text-xs text-gray-500 font-semibold">Steps Today</span>
-          </div>
+      <!-- Key Vitals Section -->
+      <section class="flex flex-col gap-1.5">
+        <div class="flex items-center justify-between px-1">
+          <span class="font-headline-md text-xs font-bold text-gray-500 uppercase tracking-wider">Key Vitals & Metrics</span>
         </div>
 
-        <!-- Sleep Quality Card -->
-        <div class="bg-surface-container-lowest rounded-2xl p-unit-md shadow-sm border border-surface-container-high/40 flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <span class="material-symbols-outlined text-[20px] text-indigo-500">bedtime</span>
-            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+        <div class="grid grid-cols-3 gap-unit-xs">
+          <!-- Steps Card -->
+          <div id="home-steps-card" role="button" title="Click to edit steps" class="group bg-surface-container-lowest rounded-2xl p-unit-md shadow-sm border border-surface-container-high/40 hover:border-blue-400/80 hover:shadow-md transition-all flex flex-col justify-between cursor-pointer select-none relative">
+            <div class="flex items-center justify-between">
+              <span class="material-symbols-outlined text-[20px] text-blue-600">directions_walk</span>
+            </div>
+            <div class="mt-2">
+              <span class="font-stat-counter text-xl font-extrabold text-on-surface block leading-tight">${stats.steps.toLocaleString()}</span>
+              <span class="font-label-md text-xs text-gray-500 font-semibold group-hover:text-blue-600 transition-colors flex items-center gap-0.5">
+                <span>Steps Today</span>
+              </span>
+            </div>
           </div>
-          <div class="mt-2">
-            <span class="font-stat-counter text-xl font-extrabold text-on-surface block leading-tight">${stats.sleep}</span>
-            <span class="font-label-md text-xs text-gray-500 font-semibold">${stats.sleepScore}</span>
-          </div>
-        </div>
 
-        <!-- Resting Heart Rate Card -->
-        <div class="bg-surface-container-lowest rounded-2xl p-unit-md shadow-sm border border-surface-container-high/40 flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <span class="material-symbols-outlined text-[20px] text-red-500 fill">favorite</span>
-            <span class="text-[11px] font-bold text-emerald-600">${stats.hrChange}</span>
+          <!-- Sleep Card -->
+          <div id="home-sleep-card" role="button" title="Click to edit sleep schedule & alarms" class="group bg-surface-container-lowest rounded-2xl p-unit-md shadow-sm border border-surface-container-high/40 hover:border-indigo-400/80 hover:shadow-md transition-all flex flex-col justify-between cursor-pointer select-none relative">
+            <div class="flex items-center justify-between">
+              <span class="material-symbols-outlined text-[20px] text-indigo-500">bedtime</span>
+              ${(stats.wakeAlarmEnabled || stats.bedtimeAlarmEnabled) ? `
+                <span class="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-50 text-[10px] font-extrabold text-amber-700 border border-amber-200/60 shadow-2xs">
+                  <span class="material-symbols-outlined text-[12px] text-amber-600">alarm</span>
+                  <span>${stats.sleepWakeTime || '08:15'}</span>
+                </span>
+              ` : ''}
+            </div>
+            <div class="mt-2">
+              <span class="font-stat-counter text-xl font-extrabold text-on-surface block leading-tight">${stats.sleep}</span>
+              <span class="font-label-md text-xs text-gray-500 font-semibold group-hover:text-indigo-600 transition-colors">Sleep</span>
+            </div>
           </div>
-          <div class="mt-2">
-            <span class="font-stat-counter text-xl font-extrabold text-on-surface block leading-tight">${stats.restingHr} <span class="text-xs font-normal text-gray-400">bpm</span></span>
-            <span class="font-label-md text-xs text-gray-500 font-semibold">Resting HR</span>
+
+          <!-- Resting Heart Rate Card (Auto-detected from Bluetooth/Connected Devices) -->
+          <div id="home-hr-card" title="Auto-detected from Bluetooth / connected devices" class="bg-surface-container-lowest rounded-2xl p-unit-md shadow-sm border border-surface-container-high/40 flex flex-col justify-between select-none relative">
+            <div class="flex items-center justify-between">
+              <span class="material-symbols-outlined text-[20px] text-red-500 fill animate-pulse">favorite</span>
+              <span class="text-[11px] font-bold text-emerald-600">${stats.hrChange}</span>
+            </div>
+            <div class="mt-2">
+              <span class="font-stat-counter text-xl font-extrabold text-on-surface block leading-tight">${stats.restingHr} <span class="text-xs font-normal text-gray-400">bpm</span></span>
+              <span class="font-label-md text-xs text-gray-500 font-semibold flex items-center gap-1">
+                <span>Resting HR</span>
+              </span>
+            </div>
           </div>
         </div>
       </section>
@@ -164,26 +195,27 @@ export function renderHomeView() {
       <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#101317] via-[#1a202c] to-[#101317] text-white shadow-xl flex flex-col justify-between min-h-[200px] p-unit-lg border border-gray-800">
         <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-600/30 rounded-full blur-3xl pointer-events-none"></div>
         <div class="relative z-10 flex items-start justify-between">
-          <span class="bg-blue-600 text-white font-label-md text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1">
-            <span class="material-symbols-outlined text-[14px]">local_fire_department</span> Scheduled
+          <span class="${featuredWorkout.isCompleted ? 'bg-emerald-600' : 'bg-blue-600'} text-white font-label-md text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">${featuredWorkout.isCompleted ? 'task_alt' : 'local_fire_department'}</span> 
+            ${featuredWorkout.statusTag || 'Scheduled'}
           </span>
-          <span class="text-xs font-semibold text-white/70">Starts in 25 min</span>
+          <span class="text-xs font-semibold text-white/70">${featuredWorkout.timeLabel || 'Starts in 25 min'}</span>
         </div>
 
         <div class="relative z-10 my-2">
-          <h2 class="font-headline-lg-mobile text-2xl font-extrabold tracking-tight text-white">HIIT Cardio Burst</h2>
-          <p class="font-body-sm text-xs text-white/70 mt-0.5">High-intensity aerobic intervals designed for peak metabolic rate.</p>
+          <h2 class="font-headline-lg-mobile text-2xl font-extrabold tracking-tight text-white">${featuredWorkout.name || 'HIIT Cardio Burst'}</h2>
+          <p class="font-body-sm text-xs text-white/70 mt-0.5">${featuredWorkout.desc || 'High-intensity aerobic intervals designed for peak metabolic rate.'}</p>
         </div>
 
         <div class="relative z-10 flex items-center justify-between pt-2 border-t border-white/10">
           <div class="flex items-center gap-3 text-xs text-white/80 font-semibold">
-            <span>25 min</span>
+            <span>${featuredWorkout.duration || 25} min</span>
             <span>•</span>
-            <span>320 kcal target</span>
+            <span>${featuredWorkout.calories || 320} kcal target</span>
           </div>
-          <button id="home-start-workout-btn" class="h-10 px-5 rounded-full bg-blue-600 text-white font-label-md text-xs font-bold flex items-center gap-1 shadow-lg shadow-blue-500/30 hover:bg-blue-500 active:scale-95 transition-all">
-            <span class="material-symbols-outlined text-[18px] fill">play_arrow</span>
-            <span>Start Session</span>
+          <button id="home-start-workout-btn" class="h-10 px-5 rounded-full ${featuredWorkout.isCompleted ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/30' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/30'} text-white font-label-md text-xs font-bold flex items-center gap-1 shadow-lg active:scale-95 transition-all cursor-pointer">
+            <span class="material-symbols-outlined text-[18px] fill">${featuredWorkout.isCompleted ? 'check_circle' : 'play_arrow'}</span>
+            <span>${featuredWorkout.isCompleted ? 'Completed Session' : 'Start Session'}</span>
           </button>
         </div>
       </section>
@@ -193,9 +225,9 @@ export function renderHomeView() {
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
             <span class="material-symbols-outlined text-blue-600 text-[20px]">task_alt</span>
-            <h3 class="font-headline-md text-headline-md text-on-surface font-extrabold">Today's Habits</h3>
+            <h3 class="font-headline-md text-headline-md text-on-surface font-extrabold">${relativeDay ? `${relativeDay}'s Habits` : 'Daily Habits'}</h3>
           </div>
-          <button id="home-manage-habits-btn" class="font-label-md text-xs text-blue-600 font-bold hover:underline flex items-center gap-0.5">
+          <button id="home-manage-habits-btn" class="font-label-md text-xs text-blue-600 font-bold hover:underline flex items-center gap-0.5 cursor-pointer">
             <span>View All (${completedHabitsCount}/${habits.length})</span>
             <span class="material-symbols-outlined text-[16px]">chevron_right</span>
           </button>
@@ -204,21 +236,57 @@ export function renderHomeView() {
         <div class="flex flex-col gap-unit-xs">
           ${habits.map(habit => {
             const isDone = habit.completed;
-            const borderStyle = isDone ? 'border-emerald-200 bg-emerald-50/40' : 'border-gray-200 bg-white hover:bg-gray-50';
-            const iconBg = isDone ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400 hover:text-gray-700';
+            const isRecent = store.state.lastCompletedHabitId === habit.id && (Date.now() - (store.state.lastCompletedAt || 0) < 1600);
+            const borderStyle = isDone 
+              ? `border-emerald-300/80 bg-emerald-50/40 shadow-xs ${isRecent ? 'animate-card-pulse ring-2 ring-emerald-400/30' : ''}` 
+              : 'border-gray-200 bg-white hover:bg-gray-50/90 hover:border-gray-300';
+            const buttonBg = isDone 
+              ? `bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/25 ${isRecent ? 'animate-check-pop' : ''}` 
+              : 'bg-gray-100 text-gray-400 hover:bg-gray-200/80 hover:text-gray-600 border border-gray-200/70';
 
             return `
-              <div class="p-unit-md rounded-2xl border transition-all flex items-center justify-between shadow-xs ${borderStyle}">
+              <div class="habit-card p-unit-md rounded-2xl border transition-all duration-300 flex items-center justify-between shadow-xs ${borderStyle}" data-card-id="${habit.id}">
                 <div class="flex items-center gap-unit-sm min-w-0">
-                  <button data-habit-id="${habit.id}" class="habit-toggle w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-transform active:scale-90 ${iconBg}">
-                    <span class="material-symbols-outlined text-[20px] font-bold">${isDone ? 'check' : 'radio_button_unchecked'}</span>
+                  <button 
+                    data-habit-id="${habit.id}" 
+                    class="habit-toggle group relative w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 cursor-pointer select-none transition-all duration-300 active:scale-90 ${buttonBg}"
+                    aria-label="${isDone ? 'Mark habit as incomplete' : 'Mark habit as complete'}"
+                  >
+                    ${isDone ? `
+                      <!-- 21st.dev Live Motion Animated Checkmark SVG -->
+                      <svg viewBox="0 0 24 24" class="w-5 h-5 fill-none stroke-white stroke-[2.75] stroke-linecap-round stroke-linejoin-round origin-center">
+                        <path class="${isRecent ? 'animate-check-draw' : ''}" d="M4.5 12.5l5 5L19.5 7" ${!isRecent ? 'style="stroke-dasharray: 28; stroke-dashoffset: 0;"' : ''}></path>
+                      </svg>
+
+                      ${isRecent ? `
+                        <!-- 21st.dev Ring Pulse Ripple -->
+                        <span class="absolute -inset-1 rounded-2xl border-2 border-emerald-400 pointer-events-none animate-check-ring"></span>
+
+                        <!-- 21st.dev Micro-particles explosion -->
+                        <span class="absolute inset-0 pointer-events-none overflow-visible">
+                          <span class="absolute w-1.5 h-1.5 rounded-full bg-emerald-400 pointer-events-none top-1/2 left-1/2 animate-check-particle" style="--dx: 22px; --dy: -20px;"></span>
+                          <span class="absolute w-1.5 h-1.5 rounded-full bg-teal-300 pointer-events-none top-1/2 left-1/2 animate-check-particle" style="--dx: -22px; --dy: -18px;"></span>
+                          <span class="absolute w-1.5 h-1.5 rounded-full bg-emerald-300 pointer-events-none top-1/2 left-1/2 animate-check-particle" style="--dx: 24px; --dy: 14px;"></span>
+                          <span class="absolute w-1.5 h-1.5 rounded-full bg-emerald-400 pointer-events-none top-1/2 left-1/2 animate-check-particle" style="--dx: -22px; --dy: 16px;"></span>
+                          <span class="absolute w-1.5 h-1.5 rounded-full bg-emerald-200 pointer-events-none top-1/2 left-1/2 animate-check-particle" style="--dx: 0px; --dy: -25px;"></span>
+                          <span class="absolute w-1.5 h-1.5 rounded-full bg-emerald-500 pointer-events-none top-1/2 left-1/2 animate-check-particle" style="--dx: 0px; --dy: 25px;"></span>
+                        </span>
+                      ` : ''}
+                    ` : `
+                      <!-- Unchecked Outline Ring -->
+                      <svg viewBox="0 0 24 24" class="w-5 h-5 fill-none stroke-current stroke-[2.2] stroke-linecap-round stroke-linejoin-round transition-transform duration-200 group-hover:scale-110">
+                        <circle cx="12" cy="12" r="8.5"></circle>
+                      </svg>
+                    `}
                   </button>
+
                   <div class="flex flex-col min-w-0">
-                    <span class="font-label-lg font-bold text-on-surface truncate text-sm ${isDone ? 'line-through text-gray-500' : ''}">${habit.name}</span>
-                    <span class="font-body-sm text-xs text-gray-500 truncate">${habit.desc}</span>
+                    <span class="font-label-lg font-bold truncate text-sm transition-all duration-200 ${isDone ? 'line-through text-gray-400 decoration-gray-400/80' : 'text-on-surface'}">${habit.name}</span>
+                    <span class="font-body-sm text-xs truncate transition-colors duration-200 ${isDone ? 'text-gray-400/80' : 'text-gray-500'}">${habit.desc}</span>
                   </div>
                 </div>
-                <div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 font-label-md text-xs font-extrabold shrink-0">
+
+                <div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 font-label-md text-xs font-extrabold shrink-0 transition-transform active:scale-95">
                   <span class="material-symbols-outlined text-[14px] fill">local_fire_department</span>
                   <span>${habit.streak}d</span>
                 </div>
@@ -298,7 +366,10 @@ export function renderHomeView() {
 export function bindHomeEvents() {
   const startBtn = document.getElementById('home-start-workout-btn');
   if (startBtn) {
-    startBtn.onclick = () => store.openWorkout('HIIT Cardio Burst', 320, 'Alternating High Knees');
+    const fw = store.state.featuredWorkout || {};
+    startBtn.onclick = () => {
+      store.openWorkout(fw.name || 'HIIT Cardio Burst', fw.calories || 320, fw.exercise || 'Alternating High Knees');
+    };
   }
 
   const manageHabitsBtn = document.getElementById('home-manage-habits-btn');
@@ -316,6 +387,14 @@ export function bindHomeEvents() {
     nextDateBtn.onclick = () => store.shiftDate(1);
   }
 
+  const todayJumpBtn = document.getElementById('home-today-jump-btn');
+  if (todayJumpBtn) {
+    todayJumpBtn.onclick = () => {
+      const todayStr = new Date().toISOString().split('T')[0];
+      store.setDate(todayStr);
+    };
+  }
+
   const waterIncBtn = document.getElementById('home-water-inc-btn');
   if (waterIncBtn) {
     waterIncBtn.onclick = () => store.logWater(0.25);
@@ -326,9 +405,20 @@ export function bindHomeEvents() {
     waterDecBtn.onclick = () => store.logWater(-0.25);
   }
 
-  const quickStepsBtn = document.getElementById('home-quick-steps-btn');
-  if (quickStepsBtn) {
-    quickStepsBtn.onclick = () => store.logSteps(1000);
+  // Direct Vitals Editing Openers
+  const openEditVitalsBtn = document.getElementById('home-open-edit-vitals-btn');
+  if (openEditVitalsBtn) {
+    openEditVitalsBtn.onclick = () => store.toggleEditVitals(true, 'all');
+  }
+
+  const stepsCard = document.getElementById('home-steps-card');
+  if (stepsCard) {
+    stepsCard.onclick = () => store.toggleEditVitals(true, 'steps');
+  }
+
+  const sleepCard = document.getElementById('home-sleep-card');
+  if (sleepCard) {
+    sleepCard.onclick = () => store.toggleEditVitals(true, 'sleep');
   }
 
   const sprintCard = document.getElementById('home-sprint-card');
@@ -350,9 +440,22 @@ export function bindHomeEvents() {
   }
 
   document.querySelectorAll('.habit-toggle').forEach(btn => {
-    btn.onclick = () => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
       const id = btn.getAttribute('data-habit-id');
-      if (id) store.toggleHabit(id);
+      if (!id) return;
+
+      const habit = store.state.habits.find(h => h.id === id);
+      const isChecking = habit && !habit.completed;
+
+      // Gentle haptic feedback on mobile if supported
+      if (isChecking && navigator.vibrate) {
+        try {
+          navigator.vibrate([15, 30, 20]);
+        } catch (_) {}
+      }
+
+      store.toggleHabit(id);
     };
   });
 }

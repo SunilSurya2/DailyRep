@@ -51,13 +51,163 @@
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* Smooth micro-interactions */
+/* Smooth micro-interactions & Global transitions */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, a, input, select {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 button:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
+  transition-duration: 0.08s;
 }
 
 .tab-transition {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   Page-to-Page Smooth Navigation Transitions
+   ========================================================================== */
+
+@keyframes pageSlideForward {
+  0% {
+    opacity: 0;
+    transform: translate3d(24px, 0, 0) scale(0.988);
+    filter: blur(2px);
+  }
+  60% {
+    opacity: 0.92;
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes pageSlideBackward {
+  0% {
+    opacity: 0;
+    transform: translate3d(-24px, 0, 0) scale(0.988);
+    filter: blur(2px);
+  }
+  60% {
+    opacity: 0.92;
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes pageFadeScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-page-forward {
+  animation: pageSlideForward 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, filter;
+}
+
+.animate-page-backward {
+  animation: pageSlideBackward 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, filter;
+}
+
+.animate-page-fade {
+  animation: pageFadeScale 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Modal Bottom Sheet Slide-Up */
+@keyframes sheetSpringUp {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 100%, 0);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(0, -4px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-sheet-up {
+  animation: sheetSpringUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Modal Bottom Sheet Slide-Down Exit */
+@keyframes sheetSlideDown {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+@keyframes fadeOutBackdrop {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-sheet-down {
+  animation: sheetSlideDown 0.28s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-backdrop-out {
+  animation: fadeOutBackdrop 0.28s ease-in forwards;
+  will-change: opacity;
+}
+
+/* Bottom Nav Active Pill Spring */
+@keyframes pillSpringPop {
+  0% {
+    transform: scale(0.88);
+    opacity: 0.8;
+  }
+  65% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-pill-pop {
+  animation: pillSpringPop 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Native View Transitions (when supported) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.28s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Toast Notification Animation */
@@ -99,6 +249,27 @@ button:active {
     inset 0 -1px 2px 0 rgba(0, 0, 0, 0.03);
 }
 
+/* Minimalist Custom Scrollbar */
+.dropdown-slim-scroll::-webkit-scrollbar {
+  width: 3px;
+}
+.dropdown-slim-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dropdown-slim-scroll::-webkit-scrollbar-thumb {
+  background: #E5E7EB;
+  border-radius: 9999px;
+}
+.dropdown-slim-scroll::-webkit-scrollbar-thumb:hover {
+  background: #CBD5E1;
+}
+
+/* Vitals Modal Slider Viewport */
+.vitals-slider-viewport {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
 .dark .glass-dock {
   background: rgba(16, 19, 23, 0.75);
   backdrop-filter: blur(28px) saturate(200%);
@@ -121,5 +292,146 @@ button:active {
 
 .glass-pill-inactive:hover {
   background: rgba(255, 255, 255, 0.45);
+}
+
+/* ==========================================================================
+   21st.dev Live Motion Checkbox Animations
+   Inspired by @tom_ui/animated-checkbox & @ringlabs/animated-check-box
+   ========================================================================== */
+
+@keyframes checkSpringPop {
+  0% {
+    transform: scale(0.75);
+  }
+  45% {
+    transform: scale(1.18);
+  }
+  75% {
+    transform: scale(0.94);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes checkDraw {
+  0% {
+    stroke-dashoffset: 28;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes checkRingPulse {
+  0% {
+    transform: scale(0.65);
+    opacity: 0.95;
+    border-width: 2.5px;
+  }
+  60% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.85);
+    opacity: 0;
+    border-width: 0.5px;
+  }
+}
+
+@keyframes checkParticleExplosion {
+  0% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--dx, 20px)), calc(-50% + var(--dy, -20px))) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes cardCompletionPulse {
+  0% {
+    transform: scale(0.985);
+  }
+  45% {
+    transform: scale(1.015);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-check-pop {
+  animation: checkSpringPop 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.animate-check-draw {
+  stroke-dasharray: 28;
+  stroke-dashoffset: 28;
+  animation: checkDraw 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.04s forwards;
+}
+
+.animate-check-ring {
+  animation: checkRingPulse 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-check-particle {
+  animation: checkParticleExplosion 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-card-pulse {
+  animation: cardCompletionPulse 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ==========================================================================
+   BLE Radar & Telemetry Animations
+   ========================================================================== */
+
+@keyframes radarWave {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.animate-radar-wave-1 {
+  animation: radarWave 2.4s cubic-bezier(0.1, 0.7, 0.1, 1) infinite;
+}
+
+.animate-radar-wave-2 {
+  animation: radarWave 2.4s cubic-bezier(0.1, 0.7, 0.1, 1) 0.8s infinite;
+}
+
+.animate-radar-wave-3 {
+  animation: radarWave 2.4s cubic-bezier(0.1, 0.7, 0.1, 1) 1.6s infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(37, 99, 235, 0.65);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
 }
 

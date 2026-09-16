@@ -2,6 +2,361 @@ import { store } from '../state/store.js';
 
 let selectedCategory = 'all';
 let isAddExerciseOpen = false;
+let activeSuggestedCategory = 'biceps';
+
+const SUGGESTED_CATEGORIES = [
+  { id: 'biceps', label: 'Biceps', icon: 'fitness_center' },
+  { id: 'triceps', label: 'Triceps', icon: 'front_hand' },
+  { id: 'shoulder', label: 'Shoulder', icon: 'accessibility_new' },
+  { id: 'leg', label: 'Leg', icon: 'directions_walk' },
+  { id: 'chest', label: 'Chest', icon: 'sports_gymnastics' },
+  { id: 'back', label: 'Back', icon: 'exercise' }
+];
+
+const SUGGESTED_EXERCISES_BY_CATEGORY = {
+  biceps: [
+    {
+      name: 'Standing Barbell Curl',
+      category: 'biceps',
+      catLabel: 'Overall Bicep Mass',
+      sets: 4,
+      reps: 8,
+      weight: 35,
+      scheme: '4 Sets • 8 Reps • 35kg',
+      image: '/exercises/bicep_curl.jpg',
+      tag: 'Barbell Peak'
+    },
+    {
+      name: 'Incline Dumbbell Curl',
+      category: 'biceps',
+      catLabel: 'Long Head Stretch',
+      sets: 3,
+      reps: 12,
+      weight: 14,
+      scheme: '3 Sets • 12 Reps • 14kg',
+      image: '/exercises/bicep_dumbbell.jpg',
+      tag: 'Long Head'
+    },
+    {
+      name: 'Dumbbell Hammer Curl',
+      category: 'biceps',
+      catLabel: 'Brachialis & Forearms',
+      sets: 4,
+      reps: 10,
+      weight: 18,
+      scheme: '4 Sets • 10 Reps • 18kg',
+      image: '/exercises/bicep_hands_dumbbell.jpg',
+      tag: 'Brachialis'
+    },
+    {
+      name: 'Preacher Bench Curl',
+      category: 'biceps',
+      catLabel: 'Strict Short-Head Focus',
+      sets: 3,
+      reps: 15,
+      weight: 22,
+      scheme: '3 Sets • 15 Reps • 22kg',
+      image: '/exercises/bicep_preacher.jpg',
+      tag: 'Strict Isolation'
+    },
+    {
+      name: 'High Cable / EZ Curl',
+      category: 'biceps',
+      catLabel: 'Peak Flex Contraction',
+      sets: 5,
+      reps: 6,
+      weight: 40,
+      scheme: '5 Sets • 6 Reps • 40kg',
+      image: '/exercises/bicep_curl_barbell.jpg',
+      tag: 'Heavy Contraction'
+    }
+  ],
+  triceps: [
+    {
+      name: 'Tricep Rope Pushdown',
+      category: 'triceps',
+      catLabel: 'Lateral Horseshoe Squeeze',
+      sets: 4,
+      reps: 15,
+      weight: 27,
+      scheme: '4 Sets • 15 Reps • 27kg',
+      image: '/exercises/battleropes.jpg',
+      tag: 'Horseshoe Peak'
+    },
+    {
+      name: 'Lying Skull Crushers',
+      category: 'triceps',
+      catLabel: 'Long Head Extension',
+      sets: 3,
+      reps: 10,
+      weight: 32,
+      scheme: '3 Sets • 10 Reps • 32kg',
+      image: '/exercises/bench.jpg',
+      tag: 'Long Head'
+    },
+    {
+      name: 'Close-Grip Bench Press',
+      category: 'triceps',
+      catLabel: 'Compound Tricep Power',
+      sets: 5,
+      reps: 6,
+      weight: 70,
+      scheme: '5 Sets • 6 Reps • 70kg',
+      image: '/exercises/bench.jpg',
+      tag: 'Heavy Power'
+    },
+    {
+      name: 'Overhead Dumbbell Extension',
+      category: 'triceps',
+      catLabel: 'Deep Fascia Elongation',
+      sets: 3,
+      reps: 12,
+      weight: 24,
+      scheme: '3 Sets • 12 Reps • 24kg',
+      image: '/exercises/shoulder.jpg',
+      tag: 'Fascia Stretch'
+    },
+    {
+      name: 'Parallel Bar Dips',
+      category: 'triceps',
+      catLabel: 'Lockout Strength & Density',
+      sets: 4,
+      reps: 8,
+      weight: 15,
+      scheme: '4 Sets • 8 Reps • +15kg',
+      image: '/exercises/pullup.jpg',
+      tag: 'Lockout Density'
+    }
+  ],
+  shoulder: [
+    {
+      name: 'Overhead Military Press',
+      category: 'shoulder',
+      catLabel: 'Anterior Delt Power',
+      sets: 5,
+      reps: 5,
+      weight: 55,
+      scheme: '5 Sets • 5 Reps • 55kg',
+      image: '/exercises/shoulder.jpg',
+      tag: 'Heavy Overhead'
+    },
+    {
+      name: 'Dumbbell Lateral Raise',
+      category: 'shoulder',
+      catLabel: 'Medial Deltoid Cap Width',
+      sets: 4,
+      reps: 16,
+      weight: 10,
+      scheme: '4 Sets • 16 Reps • 10kg',
+      image: '/exercises/shoulder.jpg',
+      tag: 'Medial Width'
+    },
+    {
+      name: 'Face Pulls with Rope',
+      category: 'shoulder',
+      catLabel: 'Posterior Delts & Posture',
+      sets: 3,
+      reps: 18,
+      weight: 25,
+      scheme: '3 Sets • 18 Reps • 25kg',
+      image: '/exercises/battleropes.jpg',
+      tag: 'Rotator Cuff'
+    },
+    {
+      name: 'Incline Rear Delt Flyes',
+      category: 'shoulder',
+      catLabel: 'Scapular Posterior Squeeze',
+      sets: 3,
+      reps: 14,
+      weight: 9,
+      scheme: '3 Sets • 14 Reps • 9kg',
+      image: '/exercises/bench.jpg',
+      tag: 'Rear Delt'
+    },
+    {
+      name: 'Arnold Dumbbell Press',
+      category: 'shoulder',
+      catLabel: 'Continuous Rotational Load',
+      sets: 4,
+      reps: 9,
+      weight: 20,
+      scheme: '4 Sets • 9 Reps • 20kg',
+      image: '/exercises/shoulder.jpg',
+      tag: 'Full Deltoid'
+    }
+  ],
+  leg: [
+    {
+      name: 'Barbell Back Squat',
+      category: 'leg',
+      catLabel: 'Quad & Glute Drive',
+      sets: 5,
+      reps: 5,
+      weight: 100,
+      scheme: '5 Sets • 5 Reps • 100kg',
+      image: '/exercises/squat.jpg',
+      tag: 'Compound King'
+    },
+    {
+      name: 'Romanian Deadlift (RDL)',
+      category: 'leg',
+      catLabel: 'Hamstrings & Glute Stretch',
+      sets: 4,
+      reps: 8,
+      weight: 85,
+      scheme: '4 Sets • 8 Reps • 85kg',
+      image: '/exercises/deadlift.jpg',
+      tag: 'Posterior Chain'
+    },
+    {
+      name: 'Walking Dumbbell Lunges',
+      category: 'leg',
+      catLabel: 'Unilateral Balance & Quads',
+      sets: 3,
+      reps: 14,
+      weight: 18,
+      scheme: '3 Sets • 14 Reps • 18kg',
+      image: '/exercises/lunge.jpg',
+      tag: 'Unilateral'
+    },
+    {
+      name: 'Bulgarian Split Squat',
+      category: 'leg',
+      catLabel: 'Deep Hip & Quad Loading',
+      sets: 4,
+      reps: 10,
+      weight: 16,
+      scheme: '4 Sets • 10 Reps • 16kg',
+      image: '/exercises/lunge.jpg',
+      tag: 'Deep Loading'
+    },
+    {
+      name: 'Standing Calf Raises',
+      category: 'leg',
+      catLabel: 'Gastrocnemius Power Drive',
+      sets: 4,
+      reps: 20,
+      weight: 60,
+      scheme: '4 Sets • 20 Reps • 60kg',
+      image: '/exercises/boxjump.jpg',
+      tag: 'Calf Burnout'
+    }
+  ],
+  chest: [
+    {
+      name: 'Barbell Flat Bench Press',
+      category: 'chest',
+      catLabel: 'Mid-Pectoral Power',
+      sets: 5,
+      reps: 5,
+      weight: 90,
+      scheme: '5 Sets • 5 Reps • 90kg',
+      image: '/exercises/bench.jpg',
+      tag: 'Heavy Power'
+    },
+    {
+      name: 'Incline Dumbbell Press',
+      category: 'chest',
+      catLabel: 'Upper Clavicular Pecs',
+      sets: 4,
+      reps: 8,
+      weight: 28,
+      scheme: '4 Sets • 8 Reps • 28kg',
+      image: '/exercises/bench.jpg',
+      tag: 'Upper Clavicular'
+    },
+    {
+      name: 'Weighted Chest Dips',
+      category: 'chest',
+      catLabel: 'Lower Sternal Pec Focus',
+      sets: 3,
+      reps: 10,
+      weight: 15,
+      scheme: '3 Sets • 10 Reps • +15kg',
+      image: '/exercises/pullup.jpg',
+      tag: 'Lower Pecs'
+    },
+    {
+      name: 'Standing Cable Pec Flyes',
+      category: 'chest',
+      catLabel: 'Continuous Tension Contraction',
+      sets: 3,
+      reps: 16,
+      weight: 18,
+      scheme: '3 Sets • 16 Reps • 18kg',
+      image: '/exercises/battleropes.jpg',
+      tag: 'Isolation'
+    },
+    {
+      name: 'Decline Dumbbell Press',
+      category: 'chest',
+      catLabel: 'Lower Sternal Chest Shelf',
+      sets: 4,
+      reps: 11,
+      weight: 26,
+      scheme: '4 Sets • 11 Reps • 26kg',
+      image: '/exercises/bench.jpg',
+      tag: 'Lower Shelf'
+    }
+  ],
+  back: [
+    {
+      name: 'Conventional Deadlift',
+      category: 'back',
+      catLabel: 'Entire Posterior Chain',
+      sets: 4,
+      reps: 4,
+      weight: 120,
+      scheme: '4 Sets • 4 Reps • 120kg',
+      image: '/exercises/deadlift.jpg',
+      tag: 'Posterior King'
+    },
+    {
+      name: 'Wide-Grip Pull-Up',
+      category: 'back',
+      catLabel: 'Upper Lat V-Taper Width',
+      sets: 4,
+      reps: 10,
+      weight: 0,
+      scheme: '4 Sets • 10 Reps • Bodyweight',
+      image: '/exercises/pullup.jpg',
+      tag: 'V-Taper Width'
+    },
+    {
+      name: 'Barbell Bent-Over Row',
+      category: 'back',
+      catLabel: 'Lat & Rhomboid Thickness',
+      sets: 4,
+      reps: 7,
+      weight: 75,
+      scheme: '4 Sets • 7 Reps • 75kg',
+      image: '/exercises/deadlift.jpg',
+      tag: 'Lat Thickness'
+    },
+    {
+      name: 'Seated Cable Row',
+      category: 'back',
+      catLabel: 'Scapular Retraction & Traps',
+      sets: 3,
+      reps: 13,
+      weight: 60,
+      scheme: '3 Sets • 13 Reps • 60kg',
+      image: '/exercises/battleropes.jpg',
+      tag: 'Scapula Retract'
+    },
+    {
+      name: 'Single-Arm Dumbbell Row',
+      category: 'back',
+      catLabel: 'Unilateral Lat Stretch & Flare',
+      sets: 3,
+      reps: 9,
+      weight: 32,
+      scheme: '3 Sets • 9 Reps • 32kg',
+      image: '/exercises/kettlebell.jpg',
+      tag: 'Unilateral Lat'
+    }
+  ]
+};
 
 export function renderFitnessView() {
   const { exercises } = store.state;
@@ -10,10 +365,12 @@ export function renderFitnessView() {
 
   const categories = [
     { id: 'all', label: 'All Workouts' },
-    { id: 'strength', label: 'Strength' },
-    { id: 'hiit', label: 'HIIT Cardio' },
-    { id: 'recovery', label: 'Recovery' },
-    { id: 'mobility', label: 'Mobility' }
+    { id: 'biceps', label: 'Biceps' },
+    { id: 'triceps', label: 'Triceps' },
+    { id: 'shoulder', label: 'Shoulder' },
+    { id: 'leg', label: 'Leg' },
+    { id: 'chest', label: 'Chest' },
+    { id: 'back', label: 'Back' }
   ];
 
   const filteredExercises = selectedCategory === 'all'
@@ -126,31 +483,95 @@ export function renderFitnessView() {
           </button>
         </div>
 
-        <!-- Add Exercise Inline Panel -->
+        <!-- Add Exercise Inline Panel with Suggested Movements -->
         ${isAddExerciseOpen ? `
-          <div class="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 flex flex-col gap-3 animate-fade-in">
+          <div class="p-4 rounded-3xl bg-blue-50/80 border border-blue-200/80 flex flex-col gap-3.5 animate-fade-in shadow-xs">
             <div class="flex items-center justify-between">
-              <span class="font-label-lg font-bold text-blue-900 text-sm">New Movement</span>
-              <button id="fitness-cancel-add-btn" class="text-xs text-gray-500 font-bold hover:text-gray-800">Cancel</button>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+                <span class="font-headline-md font-extrabold text-blue-950 text-sm">Add Movement</span>
+              </div>
+              <button id="fitness-cancel-add-btn" class="text-xs text-gray-500 font-bold hover:text-gray-900 px-2.5 py-1 rounded-full hover:bg-white transition-colors">Cancel</button>
             </div>
-            <input id="new-exercise-name" type="text" placeholder="Movement name (e.g. Bulgarian Split Squat)" class="w-full px-3.5 py-2 rounded-xl bg-white border border-gray-200 font-body-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <div class="grid grid-cols-3 gap-2">
-              <div>
-                <label class="text-[10px] text-gray-500 font-bold uppercase block mb-1">Sets</label>
-                <input id="new-exercise-sets" type="number" value="3" min="1" max="10" class="w-full px-3 py-1.5 rounded-xl bg-white border border-gray-200 font-body-sm text-sm" />
+
+            <!-- Suggested Exercises with High-Res Visuals -->
+            <div class="flex flex-col gap-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] uppercase tracking-wider font-extrabold text-blue-900/80 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px] text-blue-600">auto_awesome</span>
+                  <span>Suggested Movements</span>
+                </span>
+                <span class="text-[10px] text-blue-600 font-semibold">Tap to select</span>
               </div>
-              <div>
-                <label class="text-[10px] text-gray-500 font-bold uppercase block mb-1">Reps</label>
-                <input id="new-exercise-reps" type="number" value="10" min="1" max="100" class="w-full px-3 py-1.5 rounded-xl bg-white border border-gray-200 font-body-sm text-sm" />
+              
+              <!-- Category Filter Pills (Strength, HIIT, Mobility, Recovery) -->
+              <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 select-none -mx-1 px-1">
+                ${SUGGESTED_CATEGORIES.map(cat => {
+                  const isCatActive = activeSuggestedCategory === cat.id;
+                  return `
+                    <button type="button" data-sug-cat="${cat.id}" class="sug-cat-btn flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all whitespace-nowrap active:scale-95 ${
+                      isCatActive
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-gray-900'
+                    }">
+                      <span class="material-symbols-outlined text-[14px]">${cat.icon}</span>
+                      <span>${cat.label}</span>
+                      <span class="text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isCatActive ? 'bg-blue-700 text-blue-100' : 'bg-gray-100 text-gray-500'}">5</span>
+                    </button>
+                  `;
+                }).join('')}
               </div>
-              <div>
-                <label class="text-[10px] text-gray-500 font-bold uppercase block mb-1">Weight (kg)</label>
-                <input id="new-exercise-weight" type="number" value="20" min="0" max="500" class="w-full px-3 py-1.5 rounded-xl bg-white border border-gray-200 font-body-sm text-sm" />
+
+              <!-- 5 Exercises for Currently Selected Category -->
+              <div class="flex gap-2.5 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar -mx-1 px-1 snap-x">
+                ${(SUGGESTED_EXERCISES_BY_CATEGORY[activeSuggestedCategory] || []).map((sug, idx) => `
+                  <div data-suggest-idx="${idx}" data-suggest-cat="${activeSuggestedCategory}" class="suggest-exercise-card snap-start shrink-0 w-32 rounded-2xl bg-white border border-blue-100 hover:border-blue-400 p-2 flex flex-col gap-1.5 cursor-pointer shadow-2xs hover:shadow-md transition-all group active:scale-95">
+                    <div class="w-full h-24 rounded-xl overflow-hidden relative bg-gray-100">
+                      <img src="${sug.image}" alt="${sug.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-white text-[9px] font-bold tracking-wide">${sug.tag}</span>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                      <span class="text-xs font-bold text-[#101317] truncate group-hover:text-blue-600 transition-colors">${sug.name}</span>
+                      <span class="text-[10px] font-bold text-blue-600 mt-0.5">${sug.scheme || `${sug.sets} Sets • ${sug.reps} Reps ${sug.weight ? `• ${sug.weight}kg` : ''}`}</span>
+                    </div>
+                  </div>
+                `).join('')}
               </div>
             </div>
-            <button id="fitness-save-exercise-btn" class="w-full h-10 rounded-xl bg-blue-600 text-white font-label-md text-xs font-bold shadow-md active:scale-95 transition-all">
-              Save Movement
-            </button>
+
+            <!-- Movement Configuration Form -->
+            <div class="flex flex-col gap-2.5 pt-2 border-t border-blue-100">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] uppercase tracking-wider font-extrabold text-blue-900/80">Movement Details</span>
+                <span id="selected-sug-badge" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full hidden">Ready</span>
+              </div>
+              
+              <div class="relative">
+                <input id="new-exercise-name" type="text" placeholder="Select a suggested exercise or type custom name..." class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 font-body-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-[#101317]" />
+                <input type="hidden" id="new-exercise-image" value="" />
+                <input type="hidden" id="new-exercise-cat" value="biceps" />
+              </div>
+
+              <div class="grid grid-cols-3 gap-2">
+                <div class="bg-white px-3 py-1.5 rounded-xl border border-gray-200">
+                  <label class="text-[10px] text-gray-400 font-bold uppercase block">Sets</label>
+                  <input id="new-exercise-sets" type="number" value="3" min="1" max="15" class="w-full font-bold text-sm text-[#101317] focus:outline-none bg-transparent" />
+                </div>
+                <div class="bg-white px-3 py-1.5 rounded-xl border border-gray-200">
+                  <label class="text-[10px] text-gray-400 font-bold uppercase block">Reps</label>
+                  <input id="new-exercise-reps" type="number" value="10" min="1" max="100" class="w-full font-bold text-sm text-[#101317] focus:outline-none bg-transparent" />
+                </div>
+                <div class="bg-white px-3 py-1.5 rounded-xl border border-gray-200">
+                  <label class="text-[10px] text-gray-400 font-bold uppercase block">Weight (kg)</label>
+                  <input id="new-exercise-weight" type="number" value="20" min="0" max="500" class="w-full font-bold text-sm text-[#101317] focus:outline-none bg-transparent" />
+                </div>
+              </div>
+
+              <button id="fitness-save-exercise-btn" class="w-full h-11 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-label-md text-xs font-bold shadow-md shadow-blue-500/25 active:scale-95 transition-all flex items-center justify-center gap-1.5 mt-1">
+                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                <span>Add to Today's Routine</span>
+              </button>
+            </div>
           </div>
         ` : ''}
 
@@ -165,8 +586,19 @@ export function renderFitnessView() {
             return `
               <div data-exercise-id="${ex.id}" class="exercise-item group flex items-center justify-between p-unit-md rounded-2xl border transition-all cursor-pointer ${cardBg}">
                 <div class="flex items-center gap-unit-sm min-w-0">
-                  <div class="w-10 h-10 rounded-xl bg-surface-container-lowest flex items-center justify-center shrink-0 border border-surface-container-high/60 group-hover:scale-105 transition-transform">
-                    <span class="material-symbols-outlined text-[20px] ${iconColor}">${icon}</span>
+                  <div class="w-12 h-12 rounded-2xl overflow-hidden shrink-0 border border-gray-200/80 bg-gray-100 relative group-hover:scale-105 transition-all shadow-2xs">
+                    ${ex.image ? `
+                      <img src="${ex.image}" alt="${ex.name}" class="w-full h-full object-cover" />
+                    ` : `
+                      <div class="w-full h-full flex items-center justify-center bg-blue-50 text-blue-600">
+                        <span class="material-symbols-outlined text-[20px]">${icon}</span>
+                      </div>
+                    `}
+                    ${isDone ? `
+                      <div class="absolute inset-0 bg-blue-600/75 backdrop-blur-[1px] flex items-center justify-center text-white">
+                        <span class="material-symbols-outlined text-[20px] font-bold">check</span>
+                      </div>
+                    ` : ''}
                   </div>
                   <div class="flex flex-col min-w-0">
                     <span class="font-label-lg text-label-lg font-bold text-on-surface truncate ${textStyle}">
@@ -250,6 +682,53 @@ export function bindFitnessEvents() {
     };
   }
 
+  // Category filter tabs inside Add Movement panel
+  document.querySelectorAll('.sug-cat-btn').forEach(btn => {
+    btn.onclick = () => {
+      const cat = btn.getAttribute('data-sug-cat');
+      if (cat && SUGGESTED_EXERCISES_BY_CATEGORY[cat]) {
+        activeSuggestedCategory = cat;
+        store.notify();
+      }
+    };
+  });
+
+  // Suggested exercise card click handler to auto-fill inputs
+  document.querySelectorAll('.suggest-exercise-card').forEach(card => {
+    card.onclick = () => {
+      const idx = parseInt(card.getAttribute('data-suggest-idx'), 10);
+      const cat = card.getAttribute('data-suggest-cat') || activeSuggestedCategory;
+      const sug = (SUGGESTED_EXERCISES_BY_CATEGORY[cat] || [])[idx];
+      if (!sug) return;
+
+      // Visual card selection feedback
+      document.querySelectorAll('.suggest-exercise-card').forEach(c => {
+        c.classList.remove('ring-2', 'ring-blue-600', 'bg-blue-50/50');
+      });
+      card.classList.add('ring-2', 'ring-blue-600', 'bg-blue-50/50');
+
+      // Autofill form inputs
+      const nameInput = document.getElementById('new-exercise-name');
+      const setsInput = document.getElementById('new-exercise-sets');
+      const repsInput = document.getElementById('new-exercise-reps');
+      const weightInput = document.getElementById('new-exercise-weight');
+      const imageInput = document.getElementById('new-exercise-image');
+      const catInput = document.getElementById('new-exercise-cat');
+      const badge = document.getElementById('selected-sug-badge');
+
+      if (nameInput) nameInput.value = sug.name;
+      if (setsInput) setsInput.value = sug.sets;
+      if (repsInput) repsInput.value = sug.reps;
+      if (weightInput) weightInput.value = sug.weight;
+      if (imageInput) imageInput.value = sug.image;
+      if (catInput) catInput.value = sug.category;
+      if (badge) {
+        badge.textContent = `Selected: ${sug.tag}`;
+        badge.classList.remove('hidden');
+      }
+    };
+  });
+
   const saveExBtn = document.getElementById('fitness-save-exercise-btn');
   if (saveExBtn) {
     saveExBtn.onclick = () => {
@@ -257,10 +736,12 @@ export function bindFitnessEvents() {
       const setsInput = document.getElementById('new-exercise-sets');
       const repsInput = document.getElementById('new-exercise-reps');
       const weightInput = document.getElementById('new-exercise-weight');
+      const imageInput = document.getElementById('new-exercise-image');
+      const catInput = document.getElementById('new-exercise-cat');
 
       const name = nameInput ? nameInput.value.trim() : '';
       if (!name) {
-        store.showToast('Please enter a movement name', 'error');
+        store.showToast('Please select or enter an exercise', 'error');
         return;
       }
 
@@ -269,7 +750,8 @@ export function bindFitnessEvents() {
         sets: setsInput ? Number(setsInput.value) : 3,
         reps: repsInput ? Number(repsInput.value) : 10,
         weight: weightInput ? Number(weightInput.value) : 0,
-        cat: selectedCategory !== 'all' ? selectedCategory : 'strength'
+        cat: (catInput && catInput.value) ? catInput.value : (selectedCategory !== 'all' ? selectedCategory : 'biceps'),
+        image: imageInput && imageInput.value ? imageInput.value : null
       });
 
       isAddExerciseOpen = false;

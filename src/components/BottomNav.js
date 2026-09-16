@@ -27,14 +27,14 @@ export function renderBottomNav() {
           const isActive = currentTab === tab.id;
           if (isActive) {
             return `
-              <button data-tab="${tab.id}" class="nav-tab-btn flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-[24px] glass-pill-active text-white transition-all duration-300 active:scale-95 animate-fade-in">
+              <button data-tab="${tab.id}" class="nav-tab-btn flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-[24px] glass-pill-active text-white transition-all duration-300 active:scale-95 animate-pill-pop cursor-pointer">
                 <span class="material-symbols-outlined text-[20px] fill drop-shadow-sm">${tab.icon}</span>
                 <span class="font-label-lg font-bold text-xs tracking-tight drop-shadow-sm">${tab.label}</span>
               </button>
             `;
           }
           return `
-            <button data-tab="${tab.id}" class="nav-tab-btn glass-pill-inactive flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-[24px] ${inactiveBtnCls} transition-all duration-200 active:scale-90">
+            <button data-tab="${tab.id}" class="nav-tab-btn glass-pill-inactive flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-[24px] ${inactiveBtnCls} transition-all duration-200 active:scale-90 cursor-pointer">
               <span class="material-symbols-outlined text-[22px] transition-transform duration-200">${tab.icon}</span>
               <span class="font-label-md text-[10px] font-semibold ${inactiveLabelCls} mt-0.5 leading-none">${tab.label}</span>
             </button>

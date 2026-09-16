@@ -8,58 +8,32 @@ import { renderProgressView, bindProgressEvents } from './views/ProgressView.js'
 import { renderProfileView, bindProfileEvents } from './views/ProfileView.js';
 import { renderActiveWorkoutModal, bindActiveWorkoutEvents } from './views/ActiveWorkoutModal.js';
 import { renderNotificationsModal, bindNotificationsEvents } from './views/NotificationsModal.js';
+import { renderPairDeviceModal, bindPairDeviceEvents } from './views/PairDeviceModal.js';
+import { renderEditVitalsModal, bindEditVitalsEvents } from './views/EditVitalsModal.js';
+import { renderActiveAlarmOverlay, bindAlarmOverlayEvents, initAlarmWatcher } from './services/alarmService.js';
 
-function renderApp() {
-  const appEl = document.getElementById('app');
-  if (!appEl) return;
+let lastRenderedTab = null;
+const TAB_ORDER = ['home', 'fitness', 'daily', 'progress', 'profile'];
 
-  const { currentTab, toasts } = store.state;
-
-  let viewHtml = '';
-  switch (currentTab) {
+function getViewHtml(tab) {
+  switch (tab) {
     case 'home':
-      viewHtml = renderHomeView();
-      break;
+      return renderHomeView();
     case 'fitness':
-      viewHtml = renderFitnessView();
-      break;
+      return renderFitnessView();
     case 'daily':
-      viewHtml = renderDailyHabitsView();
-      break;
+      return renderDailyHabitsView();
     case 'progress':
-      viewHtml = renderProgressView();
-      break;
+      return renderProgressView();
     case 'profile':
-      viewHtml = renderProfileView();
-      break;
+      return renderProfileView();
     default:
-      viewHtml = renderHomeView();
+      return renderHomeView();
   }
+}
 
-  appEl.innerHTML = `
-    <!-- Header (Scrolls naturally with content) -->
-    ${renderHeader()}
-
-    <!-- Main Dynamic View Container -->
-    <main class="flex-1 flex flex-col relative w-full pb-28 bg-surface px-margin-mobile pt-2">
-      ${viewHtml}
-    </main>
-
-    <!-- Bottom Navigation Bar -->
-    ${renderBottomNav()}
-
-    <!-- Modals -->
-    ${renderActiveWorkoutModal()}
-    ${renderNotificationsModal()}
-  `;
-
-  // Bind DOM events
-  bindHeaderEvents();
-  bindBottomNavEvents();
-  bindActiveWorkoutEvents();
-  bindNotificationsEvents();
-
-  switch (currentTab) {
+function bindCurrentTabEvents(tab) {
+  switch (tab) {
     case 'home':
       bindHomeEvents();
       break;
@@ -76,6 +50,106 @@ function renderApp() {
       bindProfileEvents();
       break;
   }
+}
+
+function renderApp() {
+  const appEl = document.getElementById('app');
+  if (!appEl) return;
+
+  const { currentTab } = store.state;
+  const isPageSwitch = lastRenderedTab !== null && lastRenderedTab !== currentTab;
+  const viewHtml = getViewHtml(currentTab);
+
+  const pageWrapper = document.getElementById('page-view-wrapper');
+  const headerContainer = document.getElementById('header-container');
+  const bottomNavContainer = document.getElementById('bottom-nav-container');
+  const modalsContainer = document.getElementById('modals-container');
+
+  // Initial shell mount
+  if (!pageWrapper || !headerContainer || !bottomNavContainer || !modalsContainer) {
+    appEl.innerHTML = `
+      <div id="header-container">${renderHeader()}</div>
+      <main class="flex-1 flex flex-col relative w-full pb-28 bg-surface px-margin-mobile pt-2 overflow-x-hidden">
+        <div id="page-view-wrapper" class="w-full flex-1 flex flex-col">
+          ${viewHtml}
+        </div>
+      </main>
+      <div id="bottom-nav-container">${renderBottomNav()}</div>
+      <div id="modals-container">
+        ${renderActiveWorkoutModal()}
+        ${renderNotificationsModal()}
+        ${renderPairDeviceModal()}
+        ${renderEditVitalsModal()}
+        ${renderActiveAlarmOverlay()}
+      </div>
+    `;
+
+    bindHeaderEvents();
+    bindBottomNavEvents();
+    bindActiveWorkoutEvents();
+    bindNotificationsEvents();
+    bindPairDeviceEvents();
+    bindEditVitalsEvents();
+    bindAlarmOverlayEvents();
+    bindCurrentTabEvents(currentTab);
+
+    lastRenderedTab = currentTab;
+    return;
+  }
+
+  // If SWITCHING TABS: smooth directional slide transition
+  if (isPageSwitch) {
+    const prevIdx = TAB_ORDER.indexOf(lastRenderedTab);
+    const nextIdx = TAB_ORDER.indexOf(currentTab);
+    const animClass = nextIdx >= prevIdx ? 'animate-page-forward' : 'animate-page-backward';
+
+    pageWrapper.className = `w-full flex-1 flex flex-col ${animClass}`;
+    pageWrapper.innerHTML = viewHtml;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    headerContainer.innerHTML = renderHeader();
+    bindHeaderEvents();
+
+    bottomNavContainer.innerHTML = renderBottomNav();
+    bindBottomNavEvents();
+
+    modalsContainer.innerHTML = `
+      ${renderActiveWorkoutModal()}
+      ${renderNotificationsModal()}
+      ${renderPairDeviceModal()}
+      ${renderEditVitalsModal()}
+      ${renderActiveAlarmOverlay()}
+    `;
+    bindActiveWorkoutEvents();
+    bindNotificationsEvents();
+    bindPairDeviceEvents();
+    bindEditVitalsEvents();
+    bindAlarmOverlayEvents();
+
+    bindCurrentTabEvents(currentTab);
+    lastRenderedTab = currentTab;
+    return;
+  }
+
+  // If STAYING ON SAME TAB (e.g. clicking checkmark tick, logging water, etc.):
+  // Rock-solid in-place DOM update without page animations or blinking!
+  pageWrapper.className = 'w-full flex-1 flex flex-col';
+  pageWrapper.innerHTML = viewHtml;
+
+  modalsContainer.innerHTML = `
+    ${renderActiveWorkoutModal()}
+    ${renderNotificationsModal()}
+    ${renderPairDeviceModal()}
+    ${renderEditVitalsModal()}
+    ${renderActiveAlarmOverlay()}
+  `;
+  bindActiveWorkoutEvents();
+  bindNotificationsEvents();
+  bindPairDeviceEvents();
+  bindEditVitalsEvents();
+  bindAlarmOverlayEvents();
+
+  bindCurrentTabEvents(currentTab);
 }
 
 // Subscribe to reactive store changes
@@ -97,9 +171,12 @@ setInterval(() => {
   }
 }, 1000);
 
-// Initial render
-document.addEventListener('DOMContentLoaded', () => {
-  renderApp();
-});
+// Initialize background alarm scheduler
+initAlarmWatcher();
 
-renderApp();
+// Initial render
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderApp, { once: true });
+} else {
+  renderApp();
+}

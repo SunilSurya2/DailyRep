@@ -145,32 +145,51 @@ export function renderProfileView() {
       <!-- Connected Telemetry -->
       <div class="mb-unit-md">
         <div class="flex items-center justify-between mb-unit-xs px-1">
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-1.5">
             <span class="material-symbols-outlined text-[18px] text-blue-600">sensors</span>
             <h3 class="font-label-lg text-label-lg text-on-surface font-bold">Connected Telemetry</h3>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
           </div>
-          <button id="profile-pair-device-btn" class="font-label-md text-xs text-blue-600 font-bold hover:underline flex items-center gap-0.5">
-            <span class="material-symbols-outlined text-[14px]">add</span>
-            <span>Pair New</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button id="profile-manage-telemetry-btn" class="font-label-md text-xs text-gray-500 font-bold hover:text-gray-900 transition-colors">
+              Manage
+            </button>
+            <span class="text-gray-300">•</span>
+            <button id="profile-pair-device-btn" class="font-label-md text-xs text-blue-600 font-bold hover:underline flex items-center gap-0.5 active:scale-95 transition-all">
+              <span class="material-symbols-outlined text-[14px]">add</span>
+              <span>Pair New</span>
+            </button>
+          </div>
         </div>
         
         <div class="rounded-3xl bg-white p-unit-sm shadow-sm border border-gray-200 space-y-1">
           ${connectedDevices.map(dev => `
-            <div class="flex items-center justify-between p-unit-sm rounded-2xl hover:bg-gray-50 transition-colors">
+            <div data-device-row="${dev.id}" class="connected-device-row flex items-center justify-between p-unit-sm rounded-2xl hover:bg-gray-50 transition-colors cursor-pointer select-none">
               <div class="flex items-center gap-unit-sm min-w-0">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center bg-blue-50 text-blue-600 shrink-0">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center bg-blue-50 text-blue-600 shrink-0 relative">
                   <span class="material-symbols-outlined text-[20px]">${dev.icon}</span>
+                  <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
                 </div>
                 <div class="flex flex-col min-w-0">
-                  <span class="font-label-lg text-sm font-bold text-on-surface truncate">${dev.name}</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-label-lg text-sm font-bold text-on-surface truncate">${dev.name}</span>
+                    ${dev.battery ? `
+                      <span class="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5 bg-emerald-50 px-1.5 py-0.2 rounded">
+                        <span class="material-symbols-outlined text-[11px]">battery_charging_full</span>
+                        ${dev.battery}%
+                      </span>
+                    ` : ''}
+                  </div>
                   <span class="font-body-sm text-xs text-gray-500">Synced: ${dev.lastSync}</span>
                 </div>
               </div>
-              <button data-sync-device="${dev.id}" class="sync-device-btn flex items-center gap-1 shrink-0 ml-2 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 active:scale-95 transition-all">
-                <span class="material-symbols-outlined text-[14px]">sync</span>
-                <span>Sync</span>
-              </button>
+              <div class="flex items-center gap-1.5">
+                <button data-sync-device="${dev.id}" class="sync-device-btn flex items-center gap-1 shrink-0 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 active:scale-95 transition-all">
+                  <span class="material-symbols-outlined text-[14px]">sync</span>
+                  <span>Sync</span>
+                </button>
+                <span class="material-symbols-outlined text-[16px] text-gray-400">chevron_right</span>
+              </div>
             </div>
           `).join('')}
         </div>
@@ -426,9 +445,24 @@ export function bindProfileEvents() {
   const pairDeviceBtn = document.getElementById('profile-pair-device-btn');
   if (pairDeviceBtn) {
     pairDeviceBtn.onclick = () => {
-      store.showToast('Scanning for nearby BLE health telemetry devices...', 'info');
+      store.togglePairModal(true, 'apps');
     };
   }
+
+  const manageTelemetryBtn = document.getElementById('profile-manage-telemetry-btn');
+  if (manageTelemetryBtn) {
+    manageTelemetryBtn.onclick = () => {
+      store.togglePairModal(true, 'active');
+    };
+  }
+
+  document.querySelectorAll('.connected-device-row').forEach(row => {
+    row.onclick = (e) => {
+      // Don't trigger if clicked directly on the sync button
+      if (e.target.closest('.sync-device-btn')) return;
+      store.togglePairModal(true, 'active');
+    };
+  });
 
   // Preferences Toggles
   const prefPush = document.getElementById('pref-toggle-push');

@@ -13,7 +13,7 @@ export function renderActiveWorkoutModal() {
 
   return `
     <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex flex-col justify-end max-w-md mx-auto animate-fade-in">
-      <div class="bg-surface-container-lowest rounded-t-[32px] p-unit-lg shadow-2xl border-t border-gray-200 flex flex-col gap-unit-md max-h-[92vh] overflow-y-auto">
+      <div class="bg-surface-container-lowest rounded-t-[32px] p-unit-lg shadow-2xl border-t border-gray-200 flex flex-col gap-unit-md max-h-[92vh] overflow-y-auto animate-sheet-up">
         <!-- Modal Drag Bar -->
         <div class="w-12 h-1.5 rounded-full bg-gray-300 mx-auto -mt-1 mb-1"></div>
 

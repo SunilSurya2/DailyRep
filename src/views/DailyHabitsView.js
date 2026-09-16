@@ -111,17 +111,22 @@ export function renderDailyHabitsView() {
       <div class="flex flex-col gap-unit-sm">
         ${filteredHabits.map(habit => {
           const isDone = habit.completed;
-          const cardBorder = isDone ? 'border-emerald-200 bg-emerald-50/30' : 'border-gray-200 bg-white hover:bg-gray-50';
-          const buttonBg = isDone ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200';
+          const isRecent = store.state.lastCompletedHabitId === habit.id && (Date.now() - (store.state.lastCompletedAt || 0) < 1600);
+          const cardBorder = isDone 
+            ? `border-emerald-300/80 bg-emerald-50/30 ${isRecent ? 'animate-card-pulse ring-2 ring-emerald-400/30' : ''}` 
+            : 'border-gray-200 bg-white hover:bg-gray-50';
+          const buttonBg = isDone 
+            ? `bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/25 ${isRecent ? 'animate-check-pop' : ''}` 
+            : 'bg-gray-100 text-gray-400 hover:bg-gray-200/80 hover:text-gray-600 border border-gray-200/70';
 
           return `
-            <div class="p-unit-md rounded-3xl border shadow-sm flex items-center justify-between gap-unit-md transition-all relative overflow-hidden ${cardBorder}">
+            <div class="p-unit-md rounded-3xl border shadow-sm flex items-center justify-between gap-unit-md transition-all duration-300 relative overflow-hidden ${cardBorder}">
               <div class="flex items-center gap-unit-sm min-w-0">
                 <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 text-white" style="background-color: ${habit.color || '#3B82F6'};">
                   <span class="material-symbols-outlined text-[22px]">${habit.icon || 'check_circle'}</span>
                 </div>
                 <div class="flex flex-col min-w-0">
-                  <span class="font-headline-md text-sm font-bold text-[#101317] truncate ${isDone ? 'line-through text-gray-400' : ''}">
+                  <span class="font-headline-md text-sm font-bold truncate transition-all duration-200 ${isDone ? 'line-through text-gray-400 decoration-gray-400/80' : 'text-[#101317]'}">
                     ${habit.name}
                   </span>
                   <div class="flex items-center gap-1.5 mt-0.5 text-xs text-gray-500">
@@ -137,8 +142,35 @@ export function renderDailyHabitsView() {
               </div>
 
               <div class="flex items-center gap-2">
-                <button data-toggle-habit="${habit.id}" class="habit-complete-action w-11 h-11 rounded-full flex items-center justify-center shrink-0 shadow-md active:scale-90 transition-transform ${buttonBg}">
-                  <span class="material-symbols-outlined text-[22px] font-bold">${isDone ? 'done_all' : 'radio_button_unchecked'}</span>
+                <button 
+                  data-toggle-habit="${habit.id}" 
+                  class="habit-complete-action group relative w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-md cursor-pointer select-none transition-all duration-300 active:scale-90 ${buttonBg}"
+                  aria-label="${isDone ? 'Mark habit incomplete' : 'Mark habit complete'}"
+                >
+                  ${isDone ? `
+                    <!-- 21st.dev Animated Checkmark SVG -->
+                    <svg viewBox="0 0 24 24" class="w-5 h-5 fill-none stroke-white stroke-[2.75] stroke-linecap-round stroke-linejoin-round origin-center">
+                      <path class="${isRecent ? 'animate-check-draw' : ''}" d="M4.5 12.5l5 5L19.5 7" ${!isRecent ? 'style="stroke-dasharray: 28; stroke-dashoffset: 0;"' : ''}></path>
+                    </svg>
+
+                    ${isRecent ? `
+                      <!-- 21st.dev Ring Pulse Ripple -->
+                      <span class="absolute -inset-1 rounded-2xl border-2 border-emerald-400 pointer-events-none animate-check-ring"></span>
+
+                      <!-- 21st.dev Micro-particles explosion -->
+                      <span class="absolute inset-0 pointer-events-none overflow-visible">
+                        <span class="absolute w-1.5 h-1.5 rounded-full bg-emerald-400 pointer-events-none top-1/2 left-1/2 animate-check-particle" style="--dx: 22px; --dy: -20px;"></span>
+                        <span class="absolute w-1.5 h-1.5 rounded-full bg-teal-300 pointer-events-none top-1/2 left-1/2 animate-check-particle" style="--dx: -22px; --dy: -18px;"></span>
+                        <span class="absolute w-1.5 h-1.5 rounded-full bg-emerald-300 pointer-events-none top-1/2 left-1/2 animate-check-particle" style="--dx: 24px; --dy: 14px;"></span>
+                        <span class="absolute w-1.5 h-1.5 rounded-full bg-emerald-400 pointer-events-none top-1/2 left-1/2 animate-check-particle" style="--dx: -22px; --dy: 16px;"></span>
+                      </span>
+                    ` : ''}
+                  ` : `
+                    <!-- Unchecked Outline Ring -->
+                    <svg viewBox="0 0 24 24" class="w-5 h-5 fill-none stroke-current stroke-[2.2] stroke-linecap-round stroke-linejoin-round transition-transform duration-200 group-hover:scale-110">
+                      <circle cx="12" cy="12" r="8.5"></circle>
+                    </svg>
+                  `}
                 </button>
                 <button data-delete-habit="${habit.id}" title="Remove habit" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-300 hover:text-red-500 transition-colors">
                   <span class="material-symbols-outlined text-[18px]">delete</span>

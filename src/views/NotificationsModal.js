@@ -12,8 +12,8 @@ export function renderNotificationsModal() {
     : notifications;
 
   return `
-    <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex flex-col justify-end max-w-md mx-auto animate-fade-in">
-      <div class="bg-surface-container-lowest rounded-t-[32px] p-unit-lg shadow-2xl border-t border-gray-200 flex flex-col gap-unit-md max-h-[85vh] overflow-y-auto">
+    <div id="notifications-modal-backdrop" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex flex-col justify-end max-w-md mx-auto animate-fade-in cursor-pointer">
+      <div class="bg-surface-container-lowest rounded-t-[32px] p-unit-lg shadow-2xl border-t border-gray-200 flex flex-col gap-unit-md max-h-[85vh] overflow-y-auto animate-sheet-up cursor-default">
         <!-- Drag Handle -->
         <div class="w-12 h-1.5 rounded-full bg-gray-300 mx-auto -mt-1 mb-1"></div>
 
@@ -91,6 +91,15 @@ export function bindNotificationsEvents() {
   const closeBtn = document.getElementById('notif-close-btn');
   if (closeBtn) {
     closeBtn.onclick = () => store.toggleNotifications();
+  }
+
+  const backdrop = document.getElementById('notifications-modal-backdrop');
+  if (backdrop) {
+    backdrop.onclick = (e) => {
+      if (e.target === backdrop) {
+        store.toggleNotifications();
+      }
+    };
   }
 
   const markReadBtn = document.getElementById('notif-mark-read-btn');
