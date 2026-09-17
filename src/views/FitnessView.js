@@ -16,15 +16,59 @@ const SUGGESTED_CATEGORIES = [
 const SUGGESTED_EXERCISES_BY_CATEGORY = {
   biceps: [
     {
-      name: 'Standing Barbell Curl',
+      name: 'Dumbbell Biceps Curl',
       category: 'biceps',
       catLabel: 'Overall Bicep Mass',
+      sets: 4,
+      reps: 10,
+      weight: 16,
+      scheme: '4 Sets • 10 Reps • 16kg',
+      image: '/exercises/bicep_dumbbell.jpg',
+      tag: 'Classic Dumbbell'
+    },
+    {
+      name: 'Hammer Curl',
+      category: 'biceps',
+      catLabel: 'Brachialis & Forearms',
+      sets: 4,
+      reps: 10,
+      weight: 18,
+      scheme: '4 Sets • 10 Reps • 18kg',
+      image: '/exercises/bicep_hands_dumbbell.jpg',
+      tag: 'Brachialis'
+    },
+    {
+      name: 'Barbell Curl',
+      category: 'biceps',
+      catLabel: 'Heavy Mass & Density',
       sets: 4,
       reps: 8,
       weight: 35,
       scheme: '4 Sets • 8 Reps • 35kg',
       image: '/exercises/bicep_curl.jpg',
       tag: 'Barbell Peak'
+    },
+    {
+      name: 'EZ-Bar Curl',
+      category: 'biceps',
+      catLabel: 'Semi-Supinated Power',
+      sets: 4,
+      reps: 10,
+      weight: 30,
+      scheme: '4 Sets • 10 Reps • 30kg',
+      image: '/exercises/bicep_curl_barbell.jpg',
+      tag: 'EZ Bar Peak'
+    },
+    {
+      name: 'Preacher Curl',
+      category: 'biceps',
+      catLabel: 'Strict Short-Head Focus',
+      sets: 3,
+      reps: 12,
+      weight: 24,
+      scheme: '3 Sets • 12 Reps • 24kg',
+      image: '/exercises/bicep_preacher.jpg',
+      tag: 'Strict Isolation'
     },
     {
       name: 'Incline Dumbbell Curl',
@@ -38,37 +82,48 @@ const SUGGESTED_EXERCISES_BY_CATEGORY = {
       tag: 'Long Head'
     },
     {
-      name: 'Dumbbell Hammer Curl',
-      category: 'biceps',
-      catLabel: 'Brachialis & Forearms',
-      sets: 4,
-      reps: 10,
-      weight: 18,
-      scheme: '4 Sets • 10 Reps • 18kg',
-      image: '/exercises/bicep_hands_dumbbell.jpg',
-      tag: 'Brachialis'
-    },
-    {
-      name: 'Preacher Bench Curl',
-      category: 'biceps',
-      catLabel: 'Strict Short-Head Focus',
-      sets: 3,
-      reps: 15,
-      weight: 22,
-      scheme: '3 Sets • 15 Reps • 22kg',
-      image: '/exercises/bicep_preacher.jpg',
-      tag: 'Strict Isolation'
-    },
-    {
-      name: 'High Cable / EZ Curl',
+      name: 'Concentration Curl',
       category: 'biceps',
       catLabel: 'Peak Flex Contraction',
-      sets: 5,
-      reps: 6,
-      weight: 40,
-      scheme: '5 Sets • 6 Reps • 40kg',
-      image: '/exercises/bicep_curl_barbell.jpg',
-      tag: 'Heavy Contraction'
+      sets: 3,
+      reps: 12,
+      weight: 14,
+      scheme: '3 Sets • 12 Reps • 14kg',
+      image: '/exercises/concentration_curl.jpg',
+      tag: 'Peak Squeeze'
+    },
+    {
+      name: 'Cable Biceps Curl',
+      category: 'biceps',
+      catLabel: 'Constant Tension Range',
+      sets: 4,
+      reps: 12,
+      weight: 25,
+      scheme: '4 Sets • 12 Reps • 25kg',
+      image: '/exercises/cable_curl.jpg',
+      tag: 'Cable Tension'
+    },
+    {
+      name: 'Spider Curl',
+      category: 'biceps',
+      catLabel: 'Chest-Supported Peak',
+      sets: 3,
+      reps: 10,
+      weight: 20,
+      scheme: '3 Sets • 10 Reps • 20kg',
+      image: '/exercises/spider_curl.jpg',
+      tag: 'Spider Peak'
+    },
+    {
+      name: 'Reverse Curl',
+      category: 'biceps',
+      catLabel: 'Brachioradialis & Grip',
+      sets: 3,
+      reps: 12,
+      weight: 20,
+      scheme: '3 Sets • 12 Reps • 20kg',
+      image: '/exercises/reverse_curl.jpg',
+      tag: 'Reverse Grip'
     }
   ],
   triceps: [
@@ -516,7 +571,7 @@ export function renderFitnessView() {
                     }">
                       <span class="material-symbols-outlined text-[14px]">${cat.icon}</span>
                       <span>${cat.label}</span>
-                      <span class="text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isCatActive ? 'bg-blue-700 text-blue-100' : 'bg-gray-100 text-gray-500'}">5</span>
+                      <span class="text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isCatActive ? 'bg-blue-700 text-blue-100' : 'bg-gray-100 text-gray-500'}">${(SUGGESTED_EXERCISES_BY_CATEGORY[cat.id] || []).length}</span>
                     </button>
                   `;
                 }).join('')}

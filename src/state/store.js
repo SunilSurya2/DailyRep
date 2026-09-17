@@ -434,7 +434,7 @@ const defaultState = {
     { id: 'e2', name: 'Incline Dumbbell Press', details: '3 sets × 12 reps @ 24kg', done: false, cat: 'chest', weight: 24, reps: 12, sets: 3, image: '/exercises/bench.jpg' },
     { id: 'e3', name: 'Barbell Back Squat', details: '4 sets × 10 reps @ 80kg', done: false, cat: 'leg', weight: 80, reps: 10, sets: 4, image: '/exercises/squat.jpg' },
     { id: 'e4', name: 'Overhead Military Press', details: '3 sets × 10 reps @ 45kg', done: false, cat: 'shoulder', weight: 45, reps: 10, sets: 3, image: '/exercises/shoulder.jpg' },
-    { id: 'e5', name: 'Standing Barbell Curl', details: '3 sets × 12 reps @ 28kg', done: false, cat: 'biceps', weight: 28, reps: 12, sets: 3, image: '/exercises/shoulder.jpg' },
+    { id: 'e5', name: 'Standing Barbell Curl', details: '3 sets × 12 reps @ 28kg', done: false, cat: 'biceps', weight: 28, reps: 12, sets: 3, image: '/exercises/bicep_curl.jpg' },
     { id: 'e6', name: 'Tricep Rope Pushdown', details: '3 sets × 15 reps @ 25kg', done: false, cat: 'triceps', weight: 25, reps: 15, sets: 3, image: '/exercises/battleropes.jpg' }
   ],
 
