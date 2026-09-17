@@ -23,7 +23,7 @@ const SUGGESTED_EXERCISES_BY_CATEGORY = {
       reps: 10,
       weight: 16,
       scheme: '4 Sets • 10 Reps • 16kg',
-      image: '/exercises/bicep_dumbbell.jpg',
+      image: '/exercises/dumbbell_biceps_curl.jpg',
       tag: 'Classic Dumbbell'
     },
     {
@@ -45,7 +45,7 @@ const SUGGESTED_EXERCISES_BY_CATEGORY = {
       reps: 8,
       weight: 35,
       scheme: '4 Sets • 8 Reps • 35kg',
-      image: '/exercises/bicep_curl.jpg',
+      image: '/exercises/barbell_curl.jpg',
       tag: 'Barbell Peak'
     },
     {
@@ -100,7 +100,7 @@ const SUGGESTED_EXERCISES_BY_CATEGORY = {
       reps: 12,
       weight: 25,
       scheme: '4 Sets • 12 Reps • 25kg',
-      image: '/exercises/cable_curl.jpg',
+      image: '/exercises/cable_biceps_curl.jpg',
       tag: 'Cable Tension'
     },
     {
