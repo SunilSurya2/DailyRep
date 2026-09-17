@@ -16,28 +16,6 @@ const SUGGESTED_CATEGORIES = [
 const SUGGESTED_EXERCISES_BY_CATEGORY = {
   biceps: [
     {
-      name: 'Dumbbell Biceps Curl',
-      category: 'biceps',
-      catLabel: 'Overall Bicep Mass',
-      sets: 4,
-      reps: 10,
-      weight: 16,
-      scheme: '4 Sets • 10 Reps • 16kg',
-      image: '/exercises/dumbbell_biceps_curl.jpg',
-      tag: 'Classic Dumbbell'
-    },
-    {
-      name: 'Hammer Curl',
-      category: 'biceps',
-      catLabel: 'Brachialis & Forearms',
-      sets: 4,
-      reps: 10,
-      weight: 18,
-      scheme: '4 Sets • 10 Reps • 18kg',
-      image: '/exercises/bicep_hands_dumbbell.jpg',
-      tag: 'Brachialis'
-    },
-    {
       name: 'Barbell Curl',
       category: 'biceps',
       catLabel: 'Heavy Mass & Density',
@@ -49,37 +27,26 @@ const SUGGESTED_EXERCISES_BY_CATEGORY = {
       tag: 'Barbell Peak'
     },
     {
-      name: 'EZ-Bar Curl',
+      name: 'Dumbbell Biceps Curl',
       category: 'biceps',
-      catLabel: 'Semi-Supinated Power',
+      catLabel: 'Overall Bicep Mass',
       sets: 4,
       reps: 10,
-      weight: 30,
-      scheme: '4 Sets • 10 Reps • 30kg',
-      image: '/exercises/bicep_curl_barbell.jpg',
-      tag: 'EZ Bar Peak'
+      weight: 16,
+      scheme: '4 Sets • 10 Reps • 16kg',
+      image: '/exercises/dumbbell_biceps_curl.jpg',
+      tag: 'Classic Dumbbell'
     },
     {
-      name: 'Preacher Curl',
+      name: 'Spider Curl',
       category: 'biceps',
-      catLabel: 'Strict Short-Head Focus',
+      catLabel: 'Chest-Supported Peak',
       sets: 3,
-      reps: 12,
-      weight: 24,
-      scheme: '3 Sets • 12 Reps • 24kg',
-      image: '/exercises/bicep_preacher.jpg',
-      tag: 'Strict Isolation'
-    },
-    {
-      name: 'Incline Dumbbell Curl',
-      category: 'biceps',
-      catLabel: 'Long Head Stretch',
-      sets: 3,
-      reps: 12,
-      weight: 14,
-      scheme: '3 Sets • 12 Reps • 14kg',
-      image: '/exercises/bicep_dumbbell.jpg',
-      tag: 'Long Head'
+      reps: 10,
+      weight: 20,
+      scheme: '3 Sets • 10 Reps • 20kg',
+      image: '/exercises/spider_curl.jpg',
+      tag: 'Spider Peak'
     },
     {
       name: 'Concentration Curl',
@@ -102,28 +69,6 @@ const SUGGESTED_EXERCISES_BY_CATEGORY = {
       scheme: '4 Sets • 12 Reps • 25kg',
       image: '/exercises/cable_biceps_curl.jpg',
       tag: 'Cable Tension'
-    },
-    {
-      name: 'Spider Curl',
-      category: 'biceps',
-      catLabel: 'Chest-Supported Peak',
-      sets: 3,
-      reps: 10,
-      weight: 20,
-      scheme: '3 Sets • 10 Reps • 20kg',
-      image: '/exercises/spider_curl.jpg',
-      tag: 'Spider Peak'
-    },
-    {
-      name: 'Reverse Curl',
-      category: 'biceps',
-      catLabel: 'Brachioradialis & Grip',
-      sets: 3,
-      reps: 12,
-      weight: 20,
-      scheme: '3 Sets • 12 Reps • 20kg',
-      image: '/exercises/reverse_curl.jpg',
-      tag: 'Reverse Grip'
     }
   ],
   triceps: [
