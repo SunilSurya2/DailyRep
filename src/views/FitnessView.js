@@ -38,15 +38,59 @@ const SUGGESTED_EXERCISES_BY_CATEGORY = {
       tag: 'Classic Dumbbell'
     },
     {
-      name: 'Spider Curl',
+      name: 'Hammer Curl',
       category: 'biceps',
-      catLabel: 'Chest-Supported Peak',
-      sets: 3,
+      catLabel: 'Brachialis & Forearms',
+      sets: 4,
       reps: 10,
+      weight: 18,
+      scheme: '4 Sets • 10 Reps • 18kg',
+      image: '/exercises/hammer_curl.jpg',
+      tag: 'Brachialis'
+    },
+    {
+      name: 'EZ-Bar Curl',
+      category: 'biceps',
+      catLabel: 'Semi-Supinated Power',
+      sets: 4,
+      reps: 10,
+      weight: 30,
+      scheme: '4 Sets • 10 Reps • 30kg',
+      image: '/exercises/ez_bar_curl.jpg',
+      tag: 'EZ Bar Peak'
+    },
+    {
+      name: 'Reverse Curl',
+      category: 'biceps',
+      catLabel: 'Brachioradialis & Forearms',
+      sets: 3,
+      reps: 12,
       weight: 20,
-      scheme: '3 Sets • 10 Reps • 20kg',
-      image: '/exercises/spider_curl.jpg',
-      tag: 'Spider Peak'
+      scheme: '3 Sets • 12 Reps • 20kg',
+      image: '/exercises/reverse_curl.jpg',
+      tag: 'Reverse Grip'
+    },
+    {
+      name: 'Incline Dumbbell Curl',
+      category: 'biceps',
+      catLabel: 'Long Head Stretch',
+      sets: 3,
+      reps: 12,
+      weight: 14,
+      scheme: '3 Sets • 12 Reps • 14kg',
+      image: '/exercises/incline_dumbbell_curl.jpg',
+      tag: 'Long Head'
+    },
+    {
+      name: 'Preacher Curl',
+      category: 'biceps',
+      catLabel: 'Strict Short-Head Focus',
+      sets: 3,
+      reps: 12,
+      weight: 24,
+      scheme: '3 Sets • 12 Reps • 24kg',
+      image: '/exercises/preacher_curl.jpg',
+      tag: 'Strict Isolation'
     },
     {
       name: 'Concentration Curl',
@@ -69,6 +113,17 @@ const SUGGESTED_EXERCISES_BY_CATEGORY = {
       scheme: '4 Sets • 12 Reps • 25kg',
       image: '/exercises/cable_biceps_curl.jpg',
       tag: 'Cable Tension'
+    },
+    {
+      name: 'Spider Curl',
+      category: 'biceps',
+      catLabel: 'Chest-Supported Peak',
+      sets: 3,
+      reps: 10,
+      weight: 20,
+      scheme: '3 Sets • 10 Reps • 20kg',
+      image: '/exercises/spider_curl.jpg',
+      tag: 'Spider Peak'
     }
   ],
   triceps: [
